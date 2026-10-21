@@ -1,184 +1,486 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+* {
+  box-sizing: border-box;
 }
 
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  min-width: 100%;
+  min-height: 100%;
 }
 
-#center {
+body {
+  background: #000;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* =========================
+   GENERAL
+   ========================= */
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  background: #000;
+  color: #fff;
+
+  border: 1px solid #fff;
+
+  cursor: pointer;
+}
+
+button:hover {
+  background: #fff;
+  color: #000;
+}
+
+input {
+  background: #000;
+  color: #fff;
+
+  border: 1px solid #fff;
+  outline: none;
+}
+
+input:focus {
+  border-color: #fff;
+}
+
+input::placeholder {
+  color: #777;
+}
+
+.error {
+  margin: 8px 0 0;
+
+  color: #fff;
+  font-size: 12px;
+}
+
+
+/* =========================
+   LOGIN
+   ========================= */
+
+.login-page {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #000;
+}
+
+.login-form {
+  width: 220px;
+
   display: flex;
   flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
 
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  gap: 10px;
 }
 
-#next-steps {
+.login-form input {
+  width: 100%;
+  height: 34px;
+
+  padding: 0 10px;
+
+  font-size: 13px;
+}
+
+.login-form button {
+  width: 75px;
+  height: 30px;
+
+  align-self: center;
+
+  font-size: 12px;
+}
+
+
+/* =========================
+   DASHBOARD
+   ========================= */
+
+.dashboard {
+  width: 100%;
+  min-height: 100vh;
+
+  padding: 25px 35px 90px;
+
+  background: #000;
+}
+
+.dashboard-header {
   display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
 
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+  align-items: center;
+  justify-content: space-between;
 }
 
-#docs {
-  border-right: 1px solid var(--border);
+.dashboard-header h1 {
+  margin: 0;
 
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+  font-size: 20px;
+  font-weight: 400;
+  text-transform: lowercase;
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
+.sign-out {
+  padding: 5px 12px;
 
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
+  font-size: 11px;
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+.divider {
+  width: 100%;
+  height: 1px;
+
+  margin-top: 15px;
+
+  background: #fff;
 }
 
-.ticks {
-  position: relative;
+
+/* =========================
+   ACCOUNT TABLE
+   ========================= */
+
+.account-table {
   width: 100%;
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+  border-left: 1px solid #333;
+  border-right: 1px solid #333;
+}
+
+
+/* Header and account rows use
+   exactly the same grid */
+
+.account-header-row,
+.account-row {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    70px
+    minmax(140px, 2fr)
+    minmax(130px, 1fr)
+    minmax(80px, 1fr)
+    minmax(120px, 1fr)
+    100px;
+
+  align-items: stretch;
+}
+
+
+/* ---------- COLUMN HEADER ---------- */
+
+.account-header-row {
+  min-height: 42px;
+
+  border-bottom: 1px solid #555;
+
+  color: #888;
+
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+
+/* ---------- ACCOUNT ROW ---------- */
+
+.account-row {
+  min-height: 72px;
+
+  border-bottom: 1px solid #333;
+
+  font-size: 13px;
+}
+
+
+/* ---------- INDIVIDUAL CELLS ---------- */
+
+.table-cell {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  padding: 10px 14px;
+
+  border-right: 1px solid #333;
+}
+
+/* Don't double-border final cell */
+
+.table-cell:last-child {
+  border-right: none;
+}
+
+
+/* ---------- PROFILE PICTURE ---------- */
+
+.pfp-cell {
+  justify-content: center;
+
+  padding: 10px;
+}
+
+.pfp {
+  width: 45px;
+  height: 45px;
+
+  display: block;
+
+  object-fit: cover;
+
+  border-radius: 0;
+}
+
+
+/* ---------- NAME ---------- */
+
+.name-cell {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ---------- STATUS ---------- */
+
+.status-cell {
+  gap: 8px;
+}
+
+.status-icon {
+  width: 16px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.cooldown-icon {
+  color: #ff4040;
+}
+
+.active-icon {
+  color: #43d17a;
+}
+
+
+/* ---------- DAYS ---------- */
+
+.days-cell {
+  color: #ddd;
+}
+
+
+/* ---------- EDIT ---------- */
+
+.edit-cell {
+  overflow: visible;
+}
+
+.icon-button {
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  font-size: 20px;
+}
+
+.icon-button:hover {
+  background: transparent;
+  color: #aaa;
+}
+
+.edit-controls {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+}
+
+.days-input {
+  width: 45px;
+  height: 28px;
+
+  padding: 4px;
+
+  text-align: center;
+}
+
+.edit-controls button {
+  padding: 4px 6px;
+
+  font-size: 10px;
+}
+
+
+/* ---------- REMOVE ---------- */
+
+.remove-cell {
+  justify-content: center;
+}
+
+.remove-button {
+  padding: 5px 9px;
+
+  font-size: 11px;
+}
+
+
+/* =========================
+   ADD ACCOUNT FORM
+   ========================= */
+
+.add-form {
+  width: 280px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+
+  margin: 30px auto 0;
+}
+
+.add-form > input {
+  height: 34px;
+
+  padding: 0 8px;
+}
+
+.checkbox-label {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  font-size: 12px;
+}
+
+.checkbox-label input {
+  accent-color: #fff;
+}
+
+.cooldown-input {
+  width: 80px;
+}
+
+.form-buttons {
+  display: flex;
+
+  gap: 8px;
+}
+
+.form-buttons button {
+  padding: 5px 10px;
+
+  font-size: 11px;
+}
+
+
+/* =========================
+   FIXED PLUS BUTTON
+   ========================= */
+
+.add-button {
+  position: fixed;
+
+  right: 30px;
+  bottom: 30px;
+
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin: 0;
+  padding: 0;
+
+  border: 1px solid #fff;
+  border-radius: 50%;
+
+  background: #fff;
+  color: #000;
+
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+
+  z-index: 100;
+}
+
+.add-button:hover {
+  background: #000;
+  color: #fff;
+}
+
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 700px) {
+
+  .dashboard {
+    padding: 20px 15px 80px;
   }
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
+  .account-table {
+    overflow-x: auto;
   }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+
+  .account-header-row,
+  .account-row {
+    min-width: 650px;
+
+    grid-template-columns:
+      60px
+      150px
+      130px
+      70px
+      140px
+      90px;
+  }
+
+  .pfp {
+    width: 38px;
+    height: 38px;
+  }
+
+  .add-button {
+    right: 20px;
+    bottom: 20px;
   }
 }

@@ -43,7 +43,6 @@ function App() {
 
     if (error) {
       setError('wrong user or pw')
-      return
     }
   }
 
@@ -52,31 +51,31 @@ function App() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor="username">user</label>
-      <input
-        type="text"
-        id="username"
-        value={username}
-        placeholder="user"
-        onChange={(e) => setUsername(e.target.value)}
-        required
-      />
+    <main className="login-page">
+      <form className="login-form" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          id="username"
+          value={username}
+          placeholder="username"
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
 
-      <label htmlFor="password">password</label>
-      <input
-        type="password"
-        id="password"
-        value={password}
-        placeholder="password"
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
+        <input
+          type="password"
+          id="password"
+          value={password}
+          placeholder="password"
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
 
-      <button type="submit">submit</button>
+        <button type="submit">login</button>
 
-      {error && <p>{error}</p>}
-    </form>
+        {error && <p className="error">{error}</p>}
+      </form>
+    </main>
   )
 }
 
