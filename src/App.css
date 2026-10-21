@@ -41,6 +41,11 @@ button:hover {
   color: #000;
 }
 
+button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
 input {
   background: #000;
   color: #fff;
@@ -49,19 +54,32 @@ input {
   outline: none;
 }
 
-input:focus {
-  border-color: #fff;
-}
-
 input::placeholder {
-  color: #777;
+  color: #666;
 }
 
 .error {
-  margin: 8px 0 0;
+  margin: 0;
 
-  color: #fff;
+  color: #ff5a5a;
+
   font-size: 12px;
+}
+
+
+/* =========================
+   REMOVE NUMBER TICKERS
+   ========================= */
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 
@@ -133,11 +151,12 @@ input::placeholder {
 
   font-size: 20px;
   font-weight: 400;
-  text-transform: lowercase;
 }
 
 .sign-out {
-  padding: 5px 12px;
+  padding: 6px 13px;
+
+  border-radius: 7px;
 
   font-size: 11px;
 }
@@ -153,7 +172,7 @@ input::placeholder {
 
 
 /* =========================
-   ACCOUNT TABLE
+   TABLE
    ========================= */
 
 .account-table {
@@ -163,10 +182,6 @@ input::placeholder {
   border-right: 1px solid #333;
 }
 
-
-/* Header and account rows use
-   exactly the same grid */
-
 .account-header-row,
 .account-row {
   width: 100%;
@@ -175,17 +190,14 @@ input::placeholder {
 
   grid-template-columns:
     70px
-    minmax(140px, 2fr)
+    minmax(150px, 2fr)
+    minmax(140px, 1fr)
+    minmax(150px, 1fr)
     minmax(130px, 1fr)
-    minmax(80px, 1fr)
-    minmax(120px, 1fr)
     100px;
 
   align-items: stretch;
 }
-
-
-/* ---------- COLUMN HEADER ---------- */
 
 .account-header-row {
   min-height: 42px;
@@ -198,9 +210,6 @@ input::placeholder {
   letter-spacing: 1px;
 }
 
-
-/* ---------- ACCOUNT ROW ---------- */
-
 .account-row {
   min-height: 72px;
 
@@ -208,9 +217,6 @@ input::placeholder {
 
   font-size: 13px;
 }
-
-
-/* ---------- INDIVIDUAL CELLS ---------- */
 
 .table-cell {
   min-width: 0;
@@ -223,19 +229,26 @@ input::placeholder {
   border-right: 1px solid #333;
 }
 
-/* Don't double-border final cell */
-
 .table-cell:last-child {
   border-right: none;
 }
 
 
-/* ---------- PROFILE PICTURE ---------- */
+/* =========================
+   PROFILE
+   ========================= */
 
 .pfp-cell {
   justify-content: center;
 
   padding: 10px;
+}
+
+.pfp-cell a {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
 }
 
 .pfp {
@@ -246,21 +259,37 @@ input::placeholder {
 
   object-fit: cover;
 
-  border-radius: 0;
+  cursor: pointer;
+
+  transition: opacity 0.15s ease;
 }
 
-
-/* ---------- NAME ---------- */
+.pfp:hover {
+  opacity: 0.7;
+}
 
 .name-cell {
   overflow: hidden;
+}
 
+.profile-link {
+  overflow: hidden;
+
+  color: #fff;
+
+  text-decoration: none;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.profile-link:hover {
+  text-decoration: underline;
+}
 
-/* ---------- STATUS ---------- */
+
+/* =========================
+   STATUS
+   ========================= */
 
 .status-cell {
   gap: 8px;
@@ -287,35 +316,56 @@ input::placeholder {
 }
 
 
-/* ---------- DAYS ---------- */
+/* =========================
+   DAYS
+   ========================= */
 
 .days-cell {
   color: #ddd;
 }
 
+.days-display {
+  display: flex;
 
-/* ---------- EDIT ---------- */
+  align-items: center;
 
-.edit-cell {
-  overflow: visible;
+  gap: 10px;
 }
+
+.date-cell {
+  color: #ddd;
+}
+
+
+/* =========================
+   EDIT COOLDOWN
+   ========================= */
 
 .icon-button {
   width: 30px;
   height: 30px;
 
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
   padding: 0;
 
-  border: none;
+  border: 1px solid #555;
+  border-radius: 6px;
 
-  background: transparent;
+  background: #000;
+  color: #bbb;
 
-  font-size: 20px;
+  font-size: 15px;
 }
 
 .icon-button:hover {
-  background: transparent;
-  color: #aaa;
+  border-color: #fff;
+
+  background: #fff;
+  color: #000;
 }
 
 .edit-controls {
@@ -323,92 +373,111 @@ input::placeholder {
 
   align-items: center;
 
-  gap: 5px;
+  gap: 6px;
 }
 
 .days-input {
-  width: 45px;
-  height: 28px;
+  width: 48px;
+  height: 32px;
 
-  padding: 4px;
+  padding: 0 8px;
 
-  text-align: center;
+  border: 1px solid #fff;
+  border-radius: 6px;
+
+  text-align: left;
 }
 
-.edit-controls button {
-  padding: 4px 6px;
+.edit-action-button {
+  width: 32px;
+  height: 32px;
 
-  font-size: 10px;
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid #555;
+  border-radius: 6px;
+
+  background: #000;
+
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
 }
 
 
-/* ---------- REMOVE ---------- */
+/* Green save check */
+
+.save-action {
+  color: #43d17a;
+}
+
+.save-action:hover {
+  border-color: #43d17a;
+
+  background: #43d17a;
+  color: #000;
+}
+
+
+/* Red cancel X */
+
+.cancel-action {
+  color: #ff4040;
+}
+
+.cancel-action:hover {
+  border-color: #ff4040;
+
+  background: #ff4040;
+  color: #000;
+}
+
+
+/* =========================
+   REMOVE
+   ========================= */
 
 .remove-cell {
   justify-content: center;
 }
 
 .remove-button {
-  padding: 5px 9px;
+  width: 30px;
+  height: 30px;
 
-  font-size: 11px;
-}
-
-
-/* =========================
-   ADD ACCOUNT FORM
-   ========================= */
-
-.add-form {
-  width: 280px;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 10px;
-
-  margin: 30px auto 0;
-}
-
-.add-form > input {
-  height: 34px;
-
-  padding: 0 8px;
-}
-
-.checkbox-label {
   display: flex;
 
   align-items: center;
+  justify-content: center;
 
-  gap: 7px;
+  padding: 0;
 
-  font-size: 12px;
+  border: 1px solid #555;
+  border-radius: 6px;
+
+  background: #000;
+  color: #ff4040;
+
+  font-size: 17px;
+  font-weight: bold;
+  line-height: 1;
 }
 
-.checkbox-label input {
-  accent-color: #fff;
-}
+.remove-button:hover {
+  border-color: #ff4040;
 
-.cooldown-input {
-  width: 80px;
-}
-
-.form-buttons {
-  display: flex;
-
-  gap: 8px;
-}
-
-.form-buttons button {
-  padding: 5px 10px;
-
-  font-size: 11px;
+  background: #ff4040;
+  color: #000;
 }
 
 
 /* =========================
-   FIXED PLUS BUTTON
+   PLUS BUTTON
    ========================= */
 
 .add-button {
@@ -448,11 +517,231 @@ input::placeholder {
 
 
 /* =========================
+   ADD ACCOUNT MODAL
+   ========================= */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.8);
+
+  z-index: 200;
+}
+
+.add-modal {
+  width: 100%;
+  max-width: 390px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 20px;
+
+  padding: 22px;
+
+  background: #000;
+
+  border: 1px solid #fff;
+  border-radius: 12px;
+}
+
+
+/* =========================
+   MODAL HEADER
+   ========================= */
+
+.add-modal-header {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding-bottom: 14px;
+
+  border-bottom: 1px solid #333;
+}
+
+.add-modal-header h2 {
+  margin: 0;
+
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.close-button {
+  width: 28px;
+  height: 28px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 5px;
+
+  font-size: 22px;
+  line-height: 1;
+}
+
+.close-button:hover {
+  background: #222;
+  color: #fff;
+}
+
+
+/* =========================
+   MODAL FORM
+   ========================= */
+
+.form-field {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  gap: 7px;
+}
+
+.form-field label {
+  width: 100%;
+
+  color: #aaa;
+
+  font-size: 11px;
+
+  text-align: left;
+}
+
+.form-field > input {
+  width: 100%;
+  height: 38px;
+
+  padding: 0 10px;
+
+  border-radius: 7px;
+
+  font-size: 12px;
+}
+
+
+/* =========================
+   COOLDOWN CHECKBOX
+   ========================= */
+
+.cooldown-toggle {
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  width: fit-content;
+
+  color: #ddd;
+
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.cooldown-toggle input {
+  width: 15px;
+  height: 15px;
+
+  margin: 0;
+
+  accent-color: #fff;
+}
+
+
+/* =========================
+   COOLDOWN DAYS
+   ========================= */
+
+.cooldown-days-field {
+  width: 100%;
+}
+
+.cooldown-days-field label {
+  width: 100%;
+
+  text-align: left;
+}
+
+.days-field-row {
+  width: 100%;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+.days-field-row input {
+  width: 65px;
+  height: 36px;
+
+  padding: 0 10px;
+
+  border-radius: 7px;
+
+  text-align: left;
+}
+
+.days-field-row span {
+  color: #aaa;
+
+  font-size: 12px;
+}
+
+
+/* =========================
+   MODAL BUTTONS
+   ========================= */
+
+.modal-actions {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 8px;
+
+  padding-top: 5px;
+}
+
+.modal-actions button {
+  padding: 7px 12px;
+
+  border-radius: 7px;
+
+  font-size: 11px;
+}
+
+.primary-button {
+  background: #fff;
+  color: #000;
+}
+
+.primary-button:hover {
+  background: #000;
+  color: #fff;
+}
+
+
+/* =========================
    MOBILE
    ========================= */
 
-@media (max-width: 700px) {
-
+@media (max-width: 800px) {
   .dashboard {
     padding: 20px 15px 80px;
   }
@@ -463,14 +752,14 @@ input::placeholder {
 
   .account-header-row,
   .account-row {
-    min-width: 650px;
+    min-width: 760px;
 
     grid-template-columns:
       60px
       150px
       130px
-      70px
-      140px
+      150px
+      130px
       90px;
   }
 

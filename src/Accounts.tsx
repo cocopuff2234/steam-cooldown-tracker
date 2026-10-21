@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
+import { users } from './users'
 
 type SteamAccount = {
   id: number
@@ -12,6 +13,7 @@ type SteamAccount = {
 
 function Accounts() {
   const [accounts, setAccounts] = useState<SteamAccount[]>([])
+  const [signedInUsername, setSignedInUsername] = useState('')
   const [showForm, setShowForm] = useState(false)
 
   const [steamUrl, setSteamUrl] = useState('')
@@ -19,14 +21,33 @@ function Accounts() {
   const [cooldownDays, setCooldownDays] = useState(1)
 
   const [editingAccount, setEditingAccount] = useState<number | null>(null)
-  const [newCooldownDays, setNewCooldownDays] = useState(0)
+  const [newCooldownDays, setNewCooldownDays] = useState('')
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
     getAccounts()
+    getSignedInUsername()
   }, [])
+
+  async function getSignedInUsername() {
+    const { data } = await supabase.auth.getUser()
+
+    const email = data.user?.email
+
+    if (!email) {
+      return
+    }
+
+    const username = Object.keys(users).find(
+      (name) => users[name] === email
+    )
+
+    if (username) {
+      setSignedInUsername(username)
+    }
+  }
 
   async function getAccounts() {
     const { data, error } = await supabase
@@ -45,13 +66,12 @@ function Accounts() {
   function calculateCooldownUntil(days: number) {
     const date = new Date()
     date.setDate(date.getDate() + days)
+
     return date.toISOString()
   }
 
   function getDaysLeft(cooldownUntil: string | null) {
-    if (!cooldownUntil) {
-      return 0
-    }
+    if (!cooldownUntil) return 0
 
     const difference =
       new Date(cooldownUntil).getTime() - Date.now()
@@ -60,6 +80,27 @@ function Accounts() {
       0,
       Math.ceil(difference / (1000 * 60 * 60 * 24))
     )
+  }
+
+  function getDateFree(cooldownUntil: string | null) {
+    if (!cooldownUntil || getDaysLeft(cooldownUntil) === 0) {
+      return '—'
+    }
+
+    return new Date(cooldownUntil).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  }
+
+  function closeAddForm() {
+    setSteamUrl('')
+    setHasCooldown(false)
+    setCooldownDays(1)
+    setShowForm(false)
+    setLoading(false)
+    setError('')
   }
 
   async function handleAddAccount(e: React.FormEvent) {
@@ -77,14 +118,13 @@ function Accounts() {
 
     if (functionError) {
       console.error('Function error:', functionError)
-      setError('Steam function failed')
+      setError('steam lookup failed')
       setLoading(false)
       return
     }
 
     if (!profile || profile.error) {
-      console.error('Steam response:', profile)
-      setError(profile?.error ?? 'Could not find Steam profile')
+      setError(profile?.error ?? 'could not find steam profile')
       setLoading(false)
       return
     }
@@ -105,29 +145,30 @@ function Accounts() {
 
     if (insertError) {
       console.error('Insert error:', insertError)
-      setError('Could not add account')
+      setError('could not add account')
       setLoading(false)
       return
     }
 
-    setSteamUrl('')
-    setHasCooldown(false)
-    setCooldownDays(1)
-    setShowForm(false)
-    setLoading(false)
-
+    closeAddForm()
     await getAccounts()
   }
 
   async function handleSetCooldown(id: number) {
-    if (newCooldownDays < 0) {
+    if (newCooldownDays.trim() === '') {
+      return
+    }
+
+    const days = Number(newCooldownDays)
+
+    if (Number.isNaN(days) || days < 0) {
       return
     }
 
     const cooldownUntil =
-      newCooldownDays === 0
+      days === 0
         ? null
-        : calculateCooldownUntil(newCooldownDays)
+        : calculateCooldownUntil(days)
 
     const { error } = await supabase
       .from('steam_accounts')
@@ -142,7 +183,7 @@ function Accounts() {
     }
 
     setEditingAccount(null)
-    setNewCooldownDays(0)
+    setNewCooldownDays('')
 
     await getAccounts()
   }
@@ -167,9 +208,12 @@ function Accounts() {
 
   return (
     <main className="dashboard">
-
       <header className="dashboard-header">
-        <h1>accounts</h1>
+        <h1>
+          {signedInUsername
+            ? `${signedInUsername}'s accounts`
+            : 'accounts'}
+        </h1>
 
         <button
           className="sign-out"
@@ -182,42 +226,48 @@ function Accounts() {
       <div className="divider" />
 
       <div className="account-table">
-
-        {/* Table header */}
         <div className="account-header-row">
           <div className="table-cell pfp-cell"></div>
           <div className="table-cell">name</div>
           <div className="table-cell">cooldown</div>
           <div className="table-cell">days</div>
-          <div className="table-cell"></div>
+          <div className="table-cell">date free</div>
           <div className="table-cell"></div>
         </div>
 
-        {/* Accounts */}
         {accounts.map((account) => {
           const daysLeft = getDaysLeft(account.cooldown_until)
           const onCooldown = daysLeft > 0
 
           return (
             <div className="account-row" key={account.id}>
-
-              {/* PFP */}
               <div className="table-cell pfp-cell">
                 {account.avatar_url && (
-                  <img
-                    className="pfp"
-                    src={account.avatar_url}
-                    alt={account.name ?? 'Steam profile'}
-                  />
+                  <a
+                    href={account.steam_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      className="pfp"
+                      src={account.avatar_url}
+                      alt={account.name ?? 'Steam profile'}
+                    />
+                  </a>
                 )}
               </div>
 
-              {/* Name */}
               <div className="table-cell name-cell">
-                {account.name ?? 'Unknown'}
+                <a
+                  className="profile-link"
+                  href={account.steam_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {account.name ?? 'Unknown'}
+                </a>
               </div>
 
-              {/* Cooldown status */}
               <div className="table-cell status-cell">
                 {onCooldown ? (
                   <>
@@ -236,158 +286,179 @@ function Accounts() {
                 )}
               </div>
 
-              {/* Days */}
               <div className="table-cell days-cell">
-                {daysLeft}
-              </div>
-
-              {/* Edit */}
-              <div className="table-cell edit-cell">
                 {editingAccount === account.id ? (
                   <div className="edit-controls">
-
                     <input
                       className="days-input"
                       type="number"
                       min="0"
                       value={newCooldownDays}
                       onChange={(e) =>
-                        setNewCooldownDays(Number(e.target.value))
+                        setNewCooldownDays(e.target.value)
                       }
                     />
 
                     <button
-                      onClick={() =>
-                        handleSetCooldown(account.id)
-                      }
+                      className="edit-action-button save-action"
+                      title="save"
+                      onClick={() => handleSetCooldown(account.id)}
                     >
-                      save
+                      ✓
                     </button>
 
                     <button
+                      className="edit-action-button cancel-action"
+                      title="cancel"
                       onClick={() => {
                         setEditingAccount(null)
-                        setNewCooldownDays(0)
+                        setNewCooldownDays('')
                       }}
                     >
-                      cancel
+                      ✕
                     </button>
-
                   </div>
                 ) : (
-                  <button
-                    className="icon-button"
-                    title="Edit cooldown"
-                    onClick={() => {
-                      setEditingAccount(account.id)
-                      setNewCooldownDays(daysLeft)
-                    }}
-                  >
-                    ✎
-                  </button>
+                  <div className="days-display">
+                    <span>{daysLeft}</span>
+
+                    <button
+                      className="icon-button"
+                      title="edit cooldown"
+                      onClick={() => {
+                        setEditingAccount(account.id)
+                        setNewCooldownDays(String(daysLeft))
+                      }}
+                    >
+                      ✎
+                    </button>
+                  </div>
                 )}
               </div>
 
-              {/* Remove */}
+              <div className="table-cell date-cell">
+                {getDateFree(account.cooldown_until)}
+              </div>
+
               <div className="table-cell remove-cell">
                 <button
                   className="remove-button"
+                  title="remove account"
                   onClick={() => handleRemove(account.id)}
                 >
-                  remove
+                  ✕
                 </button>
               </div>
-
             </div>
           )
         })}
-
       </div>
 
-      {/* Add account form */}
       {showForm && (
-        <form
-          className="add-form"
-          onSubmit={handleAddAccount}
-        >
-
-          <input
-            type="url"
-            value={steamUrl}
-            onChange={(e) =>
-              setSteamUrl(e.target.value)
+        <div
+          className="modal-backdrop"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              closeAddForm()
             }
-            placeholder="steam profile url"
-            required
-          />
+          }}
+        >
+          <form
+            className="add-modal"
+            onSubmit={handleAddAccount}
+          >
+            <div className="add-modal-header">
+              <h2>add steam account</h2>
 
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={hasCooldown}
-              onChange={(e) =>
-                setHasCooldown(e.target.checked)
-              }
-            />
+              <button
+                type="button"
+                className="close-button"
+                onClick={closeAddForm}
+              >
+                ×
+              </button>
+            </div>
 
-            cooldown
-          </label>
+            <div className="form-field">
+              <label htmlFor="steam-url">
+                steam profile url
+              </label>
 
-          {hasCooldown && (
-            <input
-              className="cooldown-input"
-              type="number"
-              min="1"
-              value={cooldownDays}
-              onChange={(e) =>
-                setCooldownDays(Number(e.target.value))
-              }
-              placeholder="days"
-              required
-            />
-          )}
+              <input
+                id="steam-url"
+                type="url"
+                value={steamUrl}
+                onChange={(e) => setSteamUrl(e.target.value)}
+                placeholder="https://steamcommunity.com/id/..."
+                required
+                autoFocus
+              />
+            </div>
 
-          <div className="form-buttons">
+            <label className="cooldown-toggle">
+              <input
+                type="checkbox"
+                checked={hasCooldown}
+                onChange={(e) => setHasCooldown(e.target.checked)}
+              />
 
-            <button
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? 'adding...' : 'add'}
-            </button>
+              <span>account is on cooldown</span>
+            </label>
 
-            <button
-              type="button"
-              onClick={() => {
-                setShowForm(false)
-                setError('')
-              }}
-            >
-              cancel
-            </button>
+            {hasCooldown && (
+              <div className="form-field cooldown-days-field">
+                <label htmlFor="cooldown-days">
+                  cooldown days
+                </label>
 
-          </div>
+                <div className="days-field-row">
+                  <input
+                    id="cooldown-days"
+                    type="number"
+                    min="1"
+                    value={cooldownDays}
+                    onChange={(e) =>
+                      setCooldownDays(Number(e.target.value))
+                    }
+                    required
+                  />
 
-          {error && (
-            <p className="error">
-              {error}
-            </p>
-          )}
+                  <span>days</span>
+                </div>
+              </div>
+            )}
 
-        </form>
+            {error && <p className="error">{error}</p>}
+
+            <div className="modal-actions">
+              <button
+                type="button"
+                onClick={closeAddForm}
+              >
+                cancel
+              </button>
+
+              <button
+                type="submit"
+                className="primary-button"
+                disabled={loading}
+              >
+                {loading ? 'adding...' : 'add account'}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
 
-      {/* Fixed add button */}
       {!showForm && (
         <button
           className="add-button"
           onClick={() => setShowForm(true)}
-          title="Add account"
+          title="add account"
         >
           +
         </button>
       )}
-
     </main>
   )
 }
