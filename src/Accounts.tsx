@@ -4,6 +4,7 @@ import { users } from './users'
 
 type SteamAccount = {
   id: number
+  user_id: string
   steam_id: string | null
   steam_url: string
   name: string | null
@@ -109,6 +110,20 @@ function Accounts() {
     setLoading(true)
     setError('')
 
+    /*
+     * Get the currently logged-in Supabase user.
+     * Their UUID becomes the owner of the Steam account.
+     */
+    const { data: userData, error: userError } =
+      await supabase.auth.getUser()
+
+    if (userError || !userData.user) {
+      console.error('User error:', userError)
+      setError('could not determine signed in user')
+      setLoading(false)
+      return
+    }
+
     const { data: profile, error: functionError } =
       await supabase.functions.invoke('steam-profile', {
         body: {
@@ -136,6 +151,7 @@ function Accounts() {
     const { error: insertError } = await supabase
       .from('steam_accounts')
       .insert({
+        user_id: userData.user.id,
         steam_id: profile.steamId,
         steam_url: profile.profileUrl,
         name: profile.name,
