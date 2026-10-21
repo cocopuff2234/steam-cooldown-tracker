@@ -19,7 +19,7 @@ function Accounts() {
 
   const [steamUrl, setSteamUrl] = useState('')
   const [hasCooldown, setHasCooldown] = useState(false)
-  const [cooldownDays, setCooldownDays] = useState(1)
+  const [cooldownDays, setCooldownDays] = useState('1')
 
   const [editingAccount, setEditingAccount] = useState<number | null>(null)
   const [newCooldownDays, setNewCooldownDays] = useState('')
@@ -98,7 +98,7 @@ function Accounts() {
   function closeAddForm() {
     setSteamUrl('')
     setHasCooldown(false)
-    setCooldownDays(1)
+    setCooldownDays('1')
     setShowForm(false)
     setLoading(false)
     setError('')
@@ -110,10 +110,6 @@ function Accounts() {
     setLoading(true)
     setError('')
 
-    /*
-     * Get the currently logged-in Supabase user.
-     * Their UUID becomes the owner of the Steam account.
-     */
     const { data: userData, error: userError } =
       await supabase.auth.getUser()
 
@@ -122,6 +118,26 @@ function Accounts() {
       setError('could not determine signed in user')
       setLoading(false)
       return
+    }
+
+    let cooldownUntil: string | null = null
+
+    if (hasCooldown) {
+      if (cooldownDays.trim() === '') {
+        setError('enter cooldown days')
+        setLoading(false)
+        return
+      }
+
+      const days = Number(cooldownDays)
+
+      if (Number.isNaN(days) || days < 1) {
+        setError('cooldown must be at least 1 day')
+        setLoading(false)
+        return
+      }
+
+      cooldownUntil = calculateCooldownUntil(days)
     }
 
     const { data: profile, error: functionError } =
@@ -143,10 +159,6 @@ function Accounts() {
       setLoading(false)
       return
     }
-
-    const cooldownUntil = hasCooldown
-      ? calculateCooldownUntil(cooldownDays)
-      : null
 
     const { error: insertError } = await supabase
       .from('steam_accounts')
@@ -434,7 +446,7 @@ function Accounts() {
                     min="1"
                     value={cooldownDays}
                     onChange={(e) =>
-                      setCooldownDays(Number(e.target.value))
+                      setCooldownDays(e.target.value)
                     }
                     required
                   />
