@@ -12,6 +12,14 @@ type SteamAccount = {
   cooldown_until: string | null
 }
 
+type FilterOption = 'all' | 'active' | 'cooldown'
+
+type SortOption =
+  | 'days-asc'
+  | 'days-desc'
+  | 'name-asc'
+  | 'date-asc'
+
 function Accounts() {
   const [accounts, setAccounts] = useState<SteamAccount[]>([])
   const [signedInUsername, setSignedInUsername] = useState('')
@@ -23,6 +31,9 @@ function Accounts() {
 
   const [editingAccount, setEditingAccount] = useState<number | null>(null)
   const [newCooldownDays, setNewCooldownDays] = useState('')
+
+  const [filter, setFilter] = useState<FilterOption>('all')
+  const [sort, setSort] = useState<SortOption>('days-asc')
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -93,6 +104,54 @@ function Accounts() {
       day: 'numeric',
       year: 'numeric',
     })
+  }
+
+  function getVisibleAccounts() {
+    let visibleAccounts = [...accounts]
+
+    if (filter === 'active') {
+      visibleAccounts = visibleAccounts.filter(
+        (account) => getDaysLeft(account.cooldown_until) === 0
+      )
+    }
+
+    if (filter === 'cooldown') {
+      visibleAccounts = visibleAccounts.filter(
+        (account) => getDaysLeft(account.cooldown_until) > 0
+      )
+    }
+
+    visibleAccounts.sort((a, b) => {
+      const aDays = getDaysLeft(a.cooldown_until)
+      const bDays = getDaysLeft(b.cooldown_until)
+
+      if (sort === 'days-asc') {
+        return aDays - bDays
+      }
+
+      if (sort === 'days-desc') {
+        return bDays - aDays
+      }
+
+      if (sort === 'name-asc') {
+        return (a.name ?? '').localeCompare(b.name ?? '')
+      }
+
+      if (sort === 'date-asc') {
+        if (!a.cooldown_until && !b.cooldown_until) return 0
+        if (!a.cooldown_until) return -1
+        if (!b.cooldown_until) return 1
+
+        return (
+          new Date(a.cooldown_until).getTime() -
+          new Date(b.cooldown_until).getTime()
+        )
+      }
+
+      return 0
+    })
+
+    return visibleAccounts
   }
 
   function closeAddForm() {
@@ -234,6 +293,8 @@ function Accounts() {
     await supabase.auth.signOut()
   }
 
+  const visibleAccounts = getVisibleAccounts()
+
   return (
     <main className="dashboard">
       <header className="dashboard-header">
@@ -253,17 +314,42 @@ function Accounts() {
 
       <div className="divider" />
 
+      <div className="table-controls">
+        <select
+          value={filter}
+          onChange={(e) =>
+            setFilter(e.target.value as FilterOption)
+          }
+        >
+          <option value="all">all accounts</option>
+          <option value="active">active</option>
+          <option value="cooldown">cooldown</option>
+        </select>
+
+        <select
+          value={sort}
+          onChange={(e) =>
+            setSort(e.target.value as SortOption)
+          }
+        >
+          <option value="days-asc">days ↑</option>
+          <option value="days-desc">days ↓</option>
+          <option value="name-asc">name a-z</option>
+          <option value="date-asc">date free</option>
+        </select>
+      </div>
+
       <div className="account-table">
         <div className="account-header-row">
           <div className="table-cell pfp-cell"></div>
           <div className="table-cell">name</div>
-          <div className="table-cell">cooldown</div>
+          <div className="table-cell">status</div>
           <div className="table-cell">days</div>
           <div className="table-cell">date free</div>
           <div className="table-cell"></div>
         </div>
 
-        {accounts.map((account) => {
+        {visibleAccounts.map((account) => {
           const daysLeft = getDaysLeft(account.cooldown_until)
           const onCooldown = daysLeft > 0
 
