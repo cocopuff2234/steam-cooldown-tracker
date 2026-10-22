@@ -15,8 +15,8 @@ type SteamAccount = {
 type FilterOption = 'all' | 'active' | 'cooldown'
 
 type SortOption =
-  | 'days-asc'
-  | 'days-desc'
+  | 'time-asc'
+  | 'time-desc'
   | 'name-asc'
   | 'date-asc'
 
@@ -28,19 +28,33 @@ function Accounts() {
   const [steamUrl, setSteamUrl] = useState('')
   const [hasCooldown, setHasCooldown] = useState(false)
   const [cooldownDays, setCooldownDays] = useState('1')
+  const [cooldownHours, setCooldownHours] = useState('0')
 
   const [editingAccount, setEditingAccount] = useState<number | null>(null)
   const [newCooldownDays, setNewCooldownDays] = useState('')
+  const [newCooldownHours, setNewCooldownHours] = useState('')
 
   const [filter, setFilter] = useState<FilterOption>('all')
-  const [sort, setSort] = useState<SortOption>('days-asc')
+  const [sort, setSort] = useState<SortOption>('time-asc')
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // Used to trigger a rerender as cooldown time passes
+  const [, setCurrentTime] = useState(Date.now())
+
   useEffect(() => {
     getAccounts()
     getSignedInUsername()
+  }, [])
+
+  // Recalculate cooldowns once per minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now())
+    }, 60 * 1000)
+
+    return () => clearInterval(timer)
   }, [])
 
   async function getSignedInUsername() {
@@ -75,27 +89,57 @@ function Accounts() {
     setAccounts(data)
   }
 
-  function calculateCooldownUntil(days: number) {
+  function calculateCooldownUntil(days: number, hours: number) {
     const date = new Date()
-    date.setDate(date.getDate() + days)
+
+    date.setTime(
+      date.getTime() +
+      days * 24 * 60 * 60 * 1000 +
+      hours * 60 * 60 * 1000
+    )
 
     return date.toISOString()
   }
 
-  function getDaysLeft(cooldownUntil: string | null) {
-    if (!cooldownUntil) return 0
+  function getTimeLeft(cooldownUntil: string | null) {
+    if (!cooldownUntil) {
+      return {
+        days: 0,
+        hours: 0,
+        milliseconds: 0,
+      }
+    }
 
     const difference =
       new Date(cooldownUntil).getTime() - Date.now()
 
-    return Math.max(
-      0,
-      Math.ceil(difference / (1000 * 60 * 60 * 24))
+    if (difference <= 0) {
+      return {
+        days: 0,
+        hours: 0,
+        milliseconds: 0,
+      }
+    }
+
+    const totalHours = Math.ceil(
+      difference / (1000 * 60 * 60)
     )
+
+    const days = Math.floor(totalHours / 24)
+    const hours = totalHours % 24
+
+    return {
+      days,
+      hours,
+      milliseconds: difference,
+    }
   }
 
   function getDateFree(cooldownUntil: string | null) {
-    if (!cooldownUntil || getDaysLeft(cooldownUntil) === 0) {
+    if (
+      !cooldownUntil ||
+      getTimeLeft(cooldownUntil).milliseconds <= 0
+    ) {
       return '—'
     }
 
@@ -111,26 +155,28 @@ function Accounts() {
 
     if (filter === 'active') {
       visibleAccounts = visibleAccounts.filter(
-        (account) => getDaysLeft(account.cooldown_until) === 0
+        (account) =>
+          getTimeLeft(account.cooldown_until).milliseconds <= 0
       )
     }
 
     if (filter === 'cooldown') {
       visibleAccounts = visibleAccounts.filter(
-        (account) => getDaysLeft(account.cooldown_until) > 0
+        (account) =>
+          getTimeLeft(account.cooldown_until).milliseconds > 0
       )
     }
 
     visibleAccounts.sort((a, b) => {
-      const aDays = getDaysLeft(a.cooldown_until)
-      const bDays = getDaysLeft(b.cooldown_until)
+      const aTime = getTimeLeft(a.cooldown_until).milliseconds
+      const bTime = getTimeLeft(b.cooldown_until).milliseconds
 
-      if (sort === 'days-asc') {
-        return aDays - bDays
+      if (sort === 'time-asc') {
+        return aTime - bTime
       }
 
-      if (sort === 'days-desc') {
-        return bDays - aDays
+      if (sort === 'time-desc') {
+        return bTime - aTime
       }
 
       if (sort === 'name-asc') {
@@ -158,6 +204,7 @@ function Accounts() {
     setSteamUrl('')
     setHasCooldown(false)
     setCooldownDays('1')
+    setCooldownHours('0')
     setShowForm(false)
     setLoading(false)
     setError('')
@@ -182,21 +229,37 @@ function Accounts() {
     let cooldownUntil: string | null = null
 
     if (hasCooldown) {
-      if (cooldownDays.trim() === '') {
-        setError('enter cooldown days')
+      if (
+        cooldownDays.trim() === '' ||
+        cooldownHours.trim() === ''
+      ) {
+        setError('enter cooldown time')
         setLoading(false)
         return
       }
 
       const days = Number(cooldownDays)
+      const hours = Number(cooldownHours)
 
-      if (Number.isNaN(days) || days < 1) {
-        setError('cooldown must be at least 1 day')
+      if (
+        Number.isNaN(days) ||
+        Number.isNaN(hours) ||
+        days < 0 ||
+        hours < 0 ||
+        hours > 23
+      ) {
+        setError('enter a valid cooldown')
         setLoading(false)
         return
       }
 
-      cooldownUntil = calculateCooldownUntil(days)
+      if (days === 0 && hours === 0) {
+        setError('cooldown must be greater than 0')
+        setLoading(false)
+        return
+      }
+
+      cooldownUntil = calculateCooldownUntil(days, hours)
     }
 
     const { data: profile, error: functionError } =
@@ -242,20 +305,30 @@ function Accounts() {
   }
 
   async function handleSetCooldown(id: number) {
-    if (newCooldownDays.trim() === '') {
+    if (
+      newCooldownDays.trim() === '' ||
+      newCooldownHours.trim() === ''
+    ) {
       return
     }
 
     const days = Number(newCooldownDays)
+    const hours = Number(newCooldownHours)
 
-    if (Number.isNaN(days) || days < 0) {
+    if (
+      Number.isNaN(days) ||
+      Number.isNaN(hours) ||
+      days < 0 ||
+      hours < 0 ||
+      hours > 23
+    ) {
       return
     }
 
     const cooldownUntil =
-      days === 0
+      days === 0 && hours === 0
         ? null
-        : calculateCooldownUntil(days)
+        : calculateCooldownUntil(days, hours)
 
     const { error } = await supabase
       .from('steam_accounts')
@@ -271,6 +344,7 @@ function Accounts() {
 
     setEditingAccount(null)
     setNewCooldownDays('')
+    setNewCooldownHours('')
 
     await getAccounts()
   }
@@ -332,8 +406,8 @@ function Accounts() {
             setSort(e.target.value as SortOption)
           }
         >
-          <option value="days-asc">days ↑</option>
-          <option value="days-desc">days ↓</option>
+          <option value="time-asc">time ↑</option>
+          <option value="time-desc">time ↓</option>
           <option value="name-asc">name a-z</option>
           <option value="date-asc">date free</option>
         </select>
@@ -343,15 +417,16 @@ function Accounts() {
         <div className="account-header-row">
           <div className="table-cell pfp-cell"></div>
           <div className="table-cell">name</div>
-          <div className="table-cell">status</div>
+          <div className="table-cell">cooldown</div>
           <div className="table-cell">days</div>
+          <div className="table-cell">hours</div>
           <div className="table-cell">date free</div>
           <div className="table-cell"></div>
         </div>
 
         {visibleAccounts.map((account) => {
-          const daysLeft = getDaysLeft(account.cooldown_until)
-          const onCooldown = daysLeft > 0
+          const timeLeft = getTimeLeft(account.cooldown_until)
+          const onCooldown = timeLeft.milliseconds > 0
 
           return (
             <div className="account-row" key={account.id}>
@@ -400,16 +475,33 @@ function Accounts() {
                 )}
               </div>
 
-              <div className="table-cell days-cell">
+              <div className="table-cell time-cell">
                 {editingAccount === account.id ? (
-                  <div className="edit-controls">
+                  <input
+                    className="time-input"
+                    type="number"
+                    min="0"
+                    value={newCooldownDays}
+                    onChange={(e) =>
+                      setNewCooldownDays(e.target.value)
+                    }
+                  />
+                ) : (
+                  <span>{timeLeft.days}</span>
+                )}
+              </div>
+
+              <div className="table-cell time-cell">
+                {editingAccount === account.id ? (
+                  <div className="hours-edit">
                     <input
-                      className="days-input"
+                      className="time-input"
                       type="number"
                       min="0"
-                      value={newCooldownDays}
+                      max="23"
+                      value={newCooldownHours}
                       onChange={(e) =>
-                        setNewCooldownDays(e.target.value)
+                        setNewCooldownHours(e.target.value)
                       }
                     />
 
@@ -427,21 +519,23 @@ function Accounts() {
                       onClick={() => {
                         setEditingAccount(null)
                         setNewCooldownDays('')
+                        setNewCooldownHours('')
                       }}
                     >
                       ✕
                     </button>
                   </div>
                 ) : (
-                  <div className="days-display">
-                    <span>{daysLeft}</span>
+                  <div className="hours-display">
+                    <span>{timeLeft.hours}</span>
 
                     <button
                       className="icon-button"
                       title="edit cooldown"
                       onClick={() => {
                         setEditingAccount(account.id)
-                        setNewCooldownDays(String(daysLeft))
+                        setNewCooldownDays(String(timeLeft.days))
+                        setNewCooldownHours(String(timeLeft.hours))
                       }}
                     >
                       ✎
@@ -520,24 +614,48 @@ function Accounts() {
             </label>
 
             {hasCooldown && (
-              <div className="form-field cooldown-days-field">
-                <label htmlFor="cooldown-days">
-                  cooldown days
-                </label>
+              <div className="cooldown-time-fields">
+                <div className="form-field">
+                  <label htmlFor="cooldown-days">
+                    cooldown days
+                  </label>
 
-                <div className="days-field-row">
-                  <input
-                    id="cooldown-days"
-                    type="number"
-                    min="1"
-                    value={cooldownDays}
-                    onChange={(e) =>
-                      setCooldownDays(e.target.value)
-                    }
-                    required
-                  />
+                  <div className="time-field-row">
+                    <input
+                      id="cooldown-days"
+                      type="number"
+                      min="0"
+                      value={cooldownDays}
+                      onChange={(e) =>
+                        setCooldownDays(e.target.value)
+                      }
+                      required
+                    />
 
-                  <span>days</span>
+                    <span>days</span>
+                  </div>
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="cooldown-hours">
+                    cooldown hours
+                  </label>
+
+                  <div className="time-field-row">
+                    <input
+                      id="cooldown-hours"
+                      type="number"
+                      min="0"
+                      max="23"
+                      value={cooldownHours}
+                      onChange={(e) =>
+                        setCooldownHours(e.target.value)
+                      }
+                      required
+                    />
+
+                    <span>hours</span>
+                  </div>
                 </div>
               </div>
             )}

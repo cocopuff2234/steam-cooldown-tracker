@@ -31,9 +31,7 @@ select {
 button {
   background: #000;
   color: #fff;
-
   border: 1px solid #fff;
-
   cursor: pointer;
 }
 
@@ -51,7 +49,6 @@ input,
 select {
   background: #000;
   color: #fff;
-
   border: 1px solid #fff;
   outline: none;
 }
@@ -62,9 +59,7 @@ input::placeholder {
 
 .error {
   margin: 0;
-
   color: #ff5a5a;
-
   font-size: 12px;
 }
 
@@ -143,7 +138,6 @@ input[type="number"] {
 
 .dashboard-header {
   display: flex;
-
   align-items: center;
   justify-content: space-between;
 }
@@ -229,10 +223,11 @@ input[type="number"] {
   grid-template-columns:
     70px
     minmax(150px, 2fr)
-    minmax(140px, 1fr)
+    minmax(130px, 1fr)
+    minmax(85px, 0.6fr)
     minmax(150px, 1fr)
     minmax(130px, 1fr)
-    100px;
+    90px;
 
   align-items: stretch;
 }
@@ -284,7 +279,6 @@ input[type="number"] {
 
 .pfp-cell a {
   display: flex;
-
   align-items: center;
   justify-content: center;
 }
@@ -337,7 +331,6 @@ input[type="number"] {
   width: 16px;
 
   display: inline-flex;
-
   align-items: center;
   justify-content: center;
 
@@ -355,23 +348,38 @@ input[type="number"] {
 
 
 /* =========================
-   DAYS
+   TIME
    ========================= */
 
-.days-cell {
+.time-cell,
+.date-cell {
   color: #ddd;
 }
 
-.days-display {
+.hours-display {
   display: flex;
-
   align-items: center;
 
   gap: 10px;
 }
 
-.date-cell {
-  color: #ddd;
+.time-input {
+  width: 48px;
+  height: 32px;
+
+  padding: 0 8px;
+
+  border: 1px solid #fff;
+  border-radius: 6px;
+
+  text-align: left;
+}
+
+.hours-edit {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
 }
 
 
@@ -384,7 +392,6 @@ input[type="number"] {
   height: 30px;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
@@ -406,32 +413,11 @@ input[type="number"] {
   color: #000;
 }
 
-.edit-controls {
-  display: flex;
-
-  align-items: center;
-
-  gap: 6px;
-}
-
-.days-input {
-  width: 48px;
-  height: 32px;
-
-  padding: 0 8px;
-
-  border: 1px solid #fff;
-  border-radius: 6px;
-
-  text-align: left;
-}
-
 .edit-action-button {
   width: 32px;
   height: 32px;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
@@ -483,7 +469,6 @@ input[type="number"] {
   height: 30px;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
@@ -522,7 +507,6 @@ input[type="number"] {
   height: 44px;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
@@ -557,7 +541,6 @@ input[type="number"] {
   inset: 0;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
@@ -592,7 +575,6 @@ input[type="number"] {
 
 .add-modal-header {
   display: flex;
-
   align-items: center;
   justify-content: space-between;
 
@@ -670,7 +652,6 @@ input[type="number"] {
 
 .cooldown-toggle {
   display: flex;
-
   align-items: center;
 
   gap: 9px;
@@ -695,30 +676,25 @@ input[type="number"] {
 
 
 /* =========================
-   COOLDOWN DAYS
+   COOLDOWN TIME
    ========================= */
 
-.cooldown-days-field {
-  width: 100%;
+.cooldown-time-fields {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 18px;
 }
 
-.cooldown-days-field label {
-  width: 100%;
-
-  text-align: left;
-}
-
-.days-field-row {
-  width: 100%;
-
+.time-field-row {
   display: flex;
-
   align-items: center;
 
   gap: 8px;
 }
 
-.days-field-row input {
+.time-field-row input {
   width: 65px;
   height: 36px;
 
@@ -729,7 +705,7 @@ input[type="number"] {
   text-align: left;
 }
 
-.days-field-row span {
+.time-field-row span {
   color: #aaa;
 
   font-size: 12px;
@@ -742,7 +718,6 @@ input[type="number"] {
 
 .modal-actions {
   display: flex;
-
   justify-content: flex-end;
 
   gap: 8px;
@@ -788,12 +763,13 @@ input[type="number"] {
 
   .account-header-row,
   .account-row {
-    min-width: 760px;
+    min-width: 850px;
 
     grid-template-columns:
       60px
       150px
       130px
+      80px
       150px
       130px
       90px;
@@ -807,5 +783,9 @@ input[type="number"] {
   .add-button {
     right: 20px;
     bottom: 20px;
+  }
+
+  .cooldown-time-fields {
+    grid-template-columns: 1fr;
   }
 }
