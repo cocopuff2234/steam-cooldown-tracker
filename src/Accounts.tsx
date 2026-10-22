@@ -40,12 +40,18 @@ function Accounts() {
   const [showForm, setShowForm] = useState(false)
   const [closingForm, setClosingForm] = useState(false)
 
+  const [deleteAccount, setDeleteAccount] =
+    useState<SteamAccount | null>(null)
+  const [deleteClosing, setDeleteClosing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
   const [steamUrl, setSteamUrl] = useState('')
   const [hasCooldown, setHasCooldown] = useState(false)
   const [cooldownDays, setCooldownDays] = useState('1')
   const [cooldownHours, setCooldownHours] = useState('0')
 
-  const [editingAccount, setEditingAccount] = useState<number | null>(null)
+  const [editingAccount, setEditingAccount] =
+    useState<number | null>(null)
   const [editingClosing, setEditingClosing] = useState(false)
   const [newCooldownDays, setNewCooldownDays] = useState('')
   const [newCooldownHours, setNewCooldownHours] = useState('')
@@ -137,7 +143,10 @@ function Accounts() {
       i < steamIds.length;
       i += PROFILE_BATCH_SIZE
     ) {
-      const batch = steamIds.slice(i, i + PROFILE_BATCH_SIZE)
+      const batch = steamIds.slice(
+        i,
+        i + PROFILE_BATCH_SIZE
+      )
 
       const { data, error } =
         await supabase.functions.invoke('steam-profile', {
@@ -147,11 +156,15 @@ function Accounts() {
         })
 
       if (error) {
-        console.error('Steam profile refresh failed:', error)
+        console.error(
+          'Steam profile refresh failed:',
+          error
+        )
         continue
       }
 
-      const profiles: SteamProfile[] = data?.profiles ?? []
+      const profiles: SteamProfile[] =
+        data?.profiles ?? []
 
       if (profiles.length === 0) continue
 
@@ -271,14 +284,16 @@ function Accounts() {
     if (filter === 'active') {
       visibleAccounts = visibleAccounts.filter(
         (account) =>
-          getTimeLeft(account.cooldown_until).milliseconds <= 0
+          getTimeLeft(account.cooldown_until)
+            .milliseconds <= 0
       )
     }
 
     if (filter === 'cooldown') {
       visibleAccounts = visibleAccounts.filter(
         (account) =>
-          getTimeLeft(account.cooldown_until).milliseconds > 0
+          getTimeLeft(account.cooldown_until)
+            .milliseconds > 0
       )
     }
 
@@ -289,11 +304,18 @@ function Accounts() {
       const bTime =
         getTimeLeft(b.cooldown_until).milliseconds
 
-      if (sort === 'time-asc') return aTime - bTime
-      if (sort === 'time-desc') return bTime - aTime
+      if (sort === 'time-asc') {
+        return aTime - bTime
+      }
+
+      if (sort === 'time-desc') {
+        return bTime - aTime
+      }
 
       if (sort === 'name-asc') {
-        return (a.name ?? '').localeCompare(b.name ?? '')
+        return (a.name ?? '').localeCompare(
+          b.name ?? ''
+        )
       }
 
       if (sort === 'date-asc') {
@@ -342,9 +364,7 @@ function Accounts() {
     }, MODAL_ANIMATION_TIME)
   }
 
-  function openCooldownEditor(
-    account: SteamAccount
-  ) {
+  function openCooldownEditor(account: SteamAccount) {
     const timeLeft =
       getTimeLeft(account.cooldown_until)
 
@@ -374,6 +394,65 @@ function Accounts() {
     window.setTimeout(() => {
       finishClosingEditor()
     }, EDIT_ANIMATION_TIME)
+  }
+
+  function openDeleteConfirmation(
+    account: SteamAccount
+  ) {
+    setDeleteClosing(false)
+    setDeleting(false)
+    setDeleteAccount(account)
+  }
+
+  function closeDeleteConfirmation() {
+    if (
+      !deleteAccount ||
+      deleteClosing ||
+      deleting
+    ) {
+      return
+    }
+
+    setDeleteClosing(true)
+
+    window.setTimeout(() => {
+      setDeleteAccount(null)
+      setDeleteClosing(false)
+    }, MODAL_ANIMATION_TIME)
+  }
+
+  async function confirmDeleteAccount() {
+    if (
+      !deleteAccount ||
+      deleting
+    ) {
+      return
+    }
+
+    setDeleting(true)
+
+    const accountId = deleteAccount.id
+
+    const { error } = await supabase
+      .from('steam_accounts')
+      .delete()
+      .eq('id', accountId)
+
+    if (error) {
+      console.error('Delete error:', error)
+      setDeleting(false)
+      return
+    }
+
+    setDeleteClosing(true)
+
+    window.setTimeout(async () => {
+      setDeleteAccount(null)
+      setDeleteClosing(false)
+      setDeleting(false)
+
+      await getAccounts()
+    }, MODAL_ANIMATION_TIME)
   }
 
   async function handleAddAccount(
@@ -446,7 +525,10 @@ function Accounts() {
     )
 
     if (functionError) {
-      console.error('Function error:', functionError)
+      console.error(
+        'Function error:',
+        functionError
+      )
       setError('steam lookup failed')
       setLoading(false)
       return
@@ -477,7 +559,10 @@ function Accounts() {
         })
 
     if (insertError) {
-      console.error('Insert error:', insertError)
+      console.error(
+        'Insert error:',
+        insertError
+      )
       setError('could not add account')
       setLoading(false)
       return
@@ -529,7 +614,10 @@ function Accounts() {
       .eq('id', id)
 
     if (error) {
-      console.error('Update error:', error)
+      console.error(
+        'Update error:',
+        error
+      )
       return
     }
 
@@ -539,20 +627,6 @@ function Accounts() {
       finishClosingEditor()
       await getAccounts()
     }, EDIT_ANIMATION_TIME)
-  }
-
-  async function handleRemove(id: number) {
-    const { error } = await supabase
-      .from('steam_accounts')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      console.error('Delete error:', error)
-      return
-    }
-
-    await getAccounts()
   }
 
   async function handleSignOut() {
@@ -590,9 +664,17 @@ function Accounts() {
             )
           }
         >
-          <option value="all">all accounts</option>
-          <option value="active">active</option>
-          <option value="cooldown">cooldown</option>
+          <option value="all">
+            all accounts
+          </option>
+
+          <option value="active">
+            active
+          </option>
+
+          <option value="cooldown">
+            cooldown
+          </option>
         </select>
 
         <select
@@ -603,10 +685,21 @@ function Accounts() {
             )
           }
         >
-          <option value="time-asc">time ↑</option>
-          <option value="time-desc">time ↓</option>
-          <option value="name-asc">name a-z</option>
-          <option value="date-asc">date free</option>
+          <option value="time-asc">
+            time ↑
+          </option>
+
+          <option value="time-desc">
+            time ↓
+          </option>
+
+          <option value="name-asc">
+            name a-z
+          </option>
+
+          <option value="date-asc">
+            date free
+          </option>
         </select>
       </div>
 
@@ -647,13 +740,17 @@ function Accounts() {
                 <div className="table-cell pfp-cell">
                   {account.avatar_url && (
                     <a
-                      href={account.steam_url}
+                      href={
+                        account.steam_url
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <img
                         className="pfp"
-                        src={account.avatar_url}
+                        src={
+                          account.avatar_url
+                        }
                         alt={
                           account.name ??
                           'steam profile'
@@ -666,11 +763,14 @@ function Accounts() {
                 <div className="table-cell name-cell">
                   <a
                     className="profile-link"
-                    href={account.steam_url}
+                    href={
+                      account.steam_url
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {account.name ?? 'unknown'}
+                    {account.name ??
+                      'unknown'}
                   </a>
                 </div>
 
@@ -680,14 +780,20 @@ function Accounts() {
                       <span className="status-icon cooldown-icon">
                         ✕
                       </span>
-                      <span>cooldown</span>
+
+                      <span>
+                        cooldown
+                      </span>
                     </>
                   ) : (
                     <>
                       <span className="status-icon active-icon">
                         ✓
                       </span>
-                      <span>active</span>
+
+                      <span>
+                        active
+                      </span>
                     </>
                   )}
                 </div>
@@ -705,7 +811,9 @@ function Accounts() {
                         className="time-input"
                         type="number"
                         min="0"
-                        value={newCooldownDays}
+                        value={
+                          newCooldownDays
+                        }
                         onChange={(e) =>
                           setNewCooldownDays(
                             e.target.value
@@ -714,7 +822,9 @@ function Accounts() {
                       />
                     </div>
                   ) : (
-                    <span>{timeLeft.days}</span>
+                    <span>
+                      {timeLeft.days}
+                    </span>
                   )}
                 </div>
 
@@ -732,7 +842,9 @@ function Accounts() {
                         type="number"
                         min="0"
                         max="23"
-                        value={newCooldownHours}
+                        value={
+                          newCooldownHours
+                        }
                         onChange={(e) =>
                           setNewCooldownHours(
                             e.target.value
@@ -743,7 +855,9 @@ function Accounts() {
                       <button
                         className="edit-action-button save-action"
                         title="save"
-                        disabled={editingClosing}
+                        disabled={
+                          editingClosing
+                        }
                         onClick={() =>
                           handleSetCooldown(
                             account.id
@@ -756,7 +870,9 @@ function Accounts() {
                       <button
                         className="edit-action-button cancel-action"
                         title="cancel"
-                        disabled={editingClosing}
+                        disabled={
+                          editingClosing
+                        }
                         onClick={
                           closeCooldownEditor
                         }
@@ -796,7 +912,9 @@ function Accounts() {
                     className="remove-button"
                     title="remove account"
                     onClick={() =>
-                      handleRemove(account.id)
+                      openDeleteConfirmation(
+                        account
+                      )
                     }
                   >
                     ✕
@@ -830,15 +948,21 @@ function Accounts() {
                 ? 'add-modal-closing'
                 : ''
             }`}
-            onSubmit={handleAddAccount}
+            onSubmit={
+              handleAddAccount
+            }
           >
             <div className="add-modal-header">
-              <h2>add steam account</h2>
+              <h2>
+                add steam account
+              </h2>
 
               <button
                 type="button"
                 className="close-button"
-                onClick={closeAddForm}
+                onClick={
+                  closeAddForm
+                }
                 aria-label="close"
               >
                 ×
@@ -866,13 +990,17 @@ function Accounts() {
             </div>
 
             <div className="cooldown-section">
-              <h3>cooldown duration</h3>
+              <h3>
+                cooldown duration
+              </h3>
 
               <div className="cooldown-card">
                 <label className="cooldown-toggle">
                   <input
                     type="checkbox"
-                    checked={hasCooldown}
+                    checked={
+                      hasCooldown
+                    }
                     onChange={(e) =>
                       setHasCooldown(
                         e.target.checked
@@ -901,18 +1029,26 @@ function Accounts() {
                       id="cooldown-days"
                       type="number"
                       min="0"
-                      value={cooldownDays}
+                      value={
+                        cooldownDays
+                      }
                       onChange={(e) =>
                         setCooldownDays(
                           e.target.value
                         )
                       }
                       aria-label="cooldown days"
-                      disabled={!hasCooldown}
-                      required={hasCooldown}
+                      disabled={
+                        !hasCooldown
+                      }
+                      required={
+                        hasCooldown
+                      }
                     />
 
-                    <span>days</span>
+                    <span>
+                      days
+                    </span>
                   </div>
 
                   <div className="duration-input">
@@ -921,18 +1057,26 @@ function Accounts() {
                       type="number"
                       min="0"
                       max="23"
-                      value={cooldownHours}
+                      value={
+                        cooldownHours
+                      }
                       onChange={(e) =>
                         setCooldownHours(
                           e.target.value
                         )
                       }
                       aria-label="cooldown hours"
-                      disabled={!hasCooldown}
-                      required={hasCooldown}
+                      disabled={
+                        !hasCooldown
+                      }
+                      required={
+                        hasCooldown
+                      }
                     />
 
-                    <span>hours</span>
+                    <span>
+                      hours
+                    </span>
                   </div>
                 </div>
               </div>
@@ -948,7 +1092,9 @@ function Accounts() {
               <button
                 type="button"
                 className="modal-cancel"
-                onClick={closeAddForm}
+                onClick={
+                  closeAddForm
+                }
               >
                 cancel
               </button>
@@ -970,10 +1116,91 @@ function Accounts() {
         </div>
       )}
 
-      {!showForm && (
+      {deleteAccount && (
+        <div
+          className={`modal-backdrop ${
+            deleteClosing
+              ? 'modal-backdrop-closing'
+              : ''
+          }`}
+          onMouseDown={(e) => {
+            if (
+              e.target ===
+              e.currentTarget
+            ) {
+              closeDeleteConfirmation()
+            }
+          }}
+        >
+          <div
+            className={`delete-modal ${
+              deleteClosing
+                ? 'add-modal-closing'
+                : ''
+            }`}
+          >
+            <div className="delete-modal-header">
+              <h2>
+                remove account
+              </h2>
+
+              <button
+                type="button"
+                className="close-button"
+                onClick={
+                  closeDeleteConfirmation
+                }
+                aria-label="close"
+                disabled={deleting}
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="delete-message">
+              are you sure you want to remove{' '}
+              <strong>
+                {deleteAccount.name ??
+                  'this account'}
+              </strong>
+              ?
+            </p>
+
+            <div className="delete-modal-actions">
+              <button
+                type="button"
+                className="delete-cancel-button"
+                onClick={
+                  closeDeleteConfirmation
+                }
+                disabled={deleting}
+              >
+                cancel
+              </button>
+
+              <button
+                type="button"
+                className="delete-confirm-button"
+                onClick={
+                  confirmDeleteAccount
+                }
+                disabled={deleting}
+              >
+                {deleting
+                  ? 'removing...'
+                  : 'remove'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!showForm && !deleteAccount && (
         <button
           className="add-button"
-          onClick={openAddForm}
+          onClick={
+            openAddForm
+          }
           title="add account"
         >
           +

@@ -11,11 +11,24 @@ body,
   min-height: 100%;
 }
 
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 body {
   background: #000;
   color: #fff;
-  font-family: Arial, Helvetica, sans-serif;
 }
+
+
+/* =========================
+   GENERAL
+   ========================= */
 
 button,
 input,
@@ -54,7 +67,9 @@ input::placeholder {
 
 .error {
   margin: 10px 0 0;
+
   color: #ff5a5a;
+
   font-size: 12px;
   text-align: left;
 }
@@ -94,32 +109,66 @@ input[type="number"] {
 
 .dashboard-header {
   opacity: 0;
-  animation: sequence-in 280ms ease-out forwards;
+
+  animation:
+    sequence-in
+    280ms
+    ease-out
+    forwards;
 }
 
 .divider {
   opacity: 0;
-  animation: sequence-in 280ms ease-out 60ms forwards;
+
+  animation:
+    sequence-in
+    280ms
+    ease-out
+    60ms
+    forwards;
 }
 
 .table-controls {
   opacity: 0;
-  animation: sequence-in 280ms ease-out 120ms forwards;
+
+  animation:
+    sequence-in
+    280ms
+    ease-out
+    120ms
+    forwards;
 }
 
 .account-header-row {
   opacity: 0;
-  animation: sequence-in 280ms ease-out 190ms forwards;
+
+  animation:
+    sequence-in
+    280ms
+    ease-out
+    190ms
+    forwards;
 }
 
 .account-row {
   opacity: 0;
-  animation: sequence-in 280ms ease-out forwards;
+
+  animation:
+    sequence-in
+    280ms
+    ease-out
+    forwards;
 }
 
 .add-button {
   opacity: 0;
-  animation: sequence-in 280ms ease-out 350ms forwards;
+
+  animation:
+    sequence-in
+    280ms
+    ease-out
+    350ms
+    forwards;
 }
 
 
@@ -150,24 +199,36 @@ input[type="number"] {
 @keyframes modal-in {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.97);
+
+    transform:
+      translateY(8px)
+      scale(0.97);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+
+    transform:
+      translateY(0)
+      scale(1);
   }
 }
 
 @keyframes modal-out {
   from {
     opacity: 1;
-    transform: translateY(0) scale(1);
+
+    transform:
+      translateY(0)
+      scale(1);
   }
 
   to {
     opacity: 0;
-    transform: translateY(6px) scale(0.97);
+
+    transform:
+      translateY(6px)
+      scale(0.97);
   }
 }
 
@@ -179,24 +240,36 @@ input[type="number"] {
 @keyframes edit-pop-in {
   from {
     opacity: 0;
-    transform: translateY(3px) scale(0.94);
+
+    transform:
+      translateY(3px)
+      scale(0.94);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+
+    transform:
+      translateY(0)
+      scale(1);
   }
 }
 
 @keyframes edit-pop-out {
   from {
     opacity: 1;
-    transform: translateY(0) scale(1);
+
+    transform:
+      translateY(0)
+      scale(1);
   }
 
   to {
     opacity: 0;
-    transform: translateY(3px) scale(0.94);
+
+    transform:
+      translateY(3px)
+      scale(0.94);
   }
 }
 
@@ -336,8 +409,16 @@ input[type="number"] {
   background-color: #000;
 
   background-image:
-    linear-gradient(45deg, transparent 50%, #aaa 50%),
-    linear-gradient(135deg, #aaa 50%, transparent 50%);
+    linear-gradient(
+      45deg,
+      transparent 50%,
+      #aaa 50%
+    ),
+    linear-gradient(
+      135deg,
+      #aaa 50%,
+      transparent 50%
+    );
 
   background-position:
     calc(100% - 16px) 50%,
@@ -609,9 +690,6 @@ input[type="number"] {
     transform 0.15s ease;
 }
 
-
-/* save check */
-
 .save-action {
   color: #43d17a;
 }
@@ -624,9 +702,6 @@ input[type="number"] {
 
   transform: scale(1.04);
 }
-
-
-/* cancel x */
 
 .cancel-action {
   color: #ff5a5a;
@@ -824,6 +899,8 @@ input[type="number"] {
   align-items: center;
   justify-content: center;
 
+  flex-shrink: 0;
+
   padding: 0;
 
   border: none;
@@ -835,9 +912,138 @@ input[type="number"] {
   font-weight: 300;
 }
 
-.close-button:hover {
+.close-button:hover:not(:disabled) {
   background: transparent;
   color: #fff;
+}
+
+
+/* =========================
+   DELETE MODAL
+   ========================= */
+
+.delete-modal {
+  width: 100%;
+  max-width: 460px;
+
+  padding: 24px;
+
+  background: #080808;
+
+  border: 1px solid #555;
+  border-radius: 16px;
+
+  text-align: left;
+
+  transform-origin: center;
+
+  animation:
+    modal-in
+    200ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
+}
+
+.delete-modal.add-modal-closing {
+  pointer-events: none;
+
+  animation:
+    modal-out
+    200ms
+    ease-in
+    forwards;
+}
+
+.delete-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.delete-modal-header h2 {
+  margin: 0;
+
+  color: #fff;
+
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.delete-message {
+  margin: 22px 0 28px;
+
+  color: #aaa;
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.delete-message strong {
+  color: #fff;
+
+  font-weight: 500;
+}
+
+.delete-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+}
+
+.delete-cancel-button,
+.delete-confirm-button {
+  min-width: 100px;
+  height: 40px;
+
+  padding: 0 18px;
+
+  border-radius: 8px;
+
+  font-size: 12px;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.delete-cancel-button {
+  border: 1px solid #555;
+
+  background: #080808;
+  color: #ddd;
+}
+
+.delete-cancel-button:hover:not(:disabled) {
+  border-color: #fff;
+
+  background: #fff;
+  color: #000;
+
+  transform: scale(1.02);
+}
+
+.delete-confirm-button {
+  border: 1px solid #ff5a5a;
+
+  background: #ff5a5a;
+  color: #000;
+
+  font-weight: 600;
+}
+
+.delete-confirm-button:hover:not(:disabled) {
+  border-color: #ff7373;
+
+  background: #ff7373;
+  color: #000;
+
+  transform: scale(1.02);
 }
 
 
@@ -1058,7 +1264,7 @@ input[type="number"] {
 
 
 /* =========================
-   MODAL ACTIONS
+   ADD MODAL ACTIONS
    ========================= */
 
 .modal-actions {
@@ -1091,7 +1297,7 @@ input[type="number"] {
   color: #ddd;
 }
 
-.modal-cancel:hover {
+.modal-cancel:hover:not(:disabled) {
   border-color: #aaa;
 
   background: #111;
@@ -1107,7 +1313,7 @@ input[type="number"] {
   font-weight: 600;
 }
 
-.primary-button:hover {
+.primary-button:hover:not(:disabled) {
   background: #ddd;
   color: #000;
 }
@@ -1156,6 +1362,12 @@ input[type="number"] {
     max-width: 480px;
   }
 
+  .delete-modal {
+    max-width: 420px;
+
+    padding: 22px;
+  }
+
   .cooldown-inputs {
     grid-template-columns: 1fr 1fr;
   }
@@ -1168,6 +1380,16 @@ input[type="number"] {
 @media (max-width: 450px) {
   .cooldown-inputs {
     grid-template-columns: 1fr;
+  }
+
+  .delete-modal-actions {
+    gap: 10px;
+  }
+
+  .delete-cancel-button,
+  .delete-confirm-button {
+    min-width: 0;
+    flex: 1;
   }
 }
 
@@ -1187,6 +1409,7 @@ input[type="number"] {
   .modal-backdrop-closing,
   .add-modal,
   .add-modal-closing,
+  .delete-modal,
   .edit-pop,
   .edit-pop-closing {
     opacity: 1;
