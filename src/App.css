@@ -67,9 +67,7 @@ input::placeholder {
 
 .error {
   margin: 10px 0 0;
-
   color: #ff5a5a;
-
   font-size: 12px;
   text-align: left;
 }
@@ -960,6 +958,10 @@ input[type="number"] {
   justify-content: space-between;
 
   gap: 20px;
+
+  padding-bottom: 16px;
+
+  border-bottom: 1px solid #282828;
 }
 
 .delete-modal-header h2 {
@@ -1274,9 +1276,10 @@ input[type="number"] {
   gap: 8px;
 
   margin-top: 16px;
-  padding-top: 14px;
 
-  border-top: 1px solid #282828;
+  /* no divider above these buttons */
+  padding-top: 0;
+  border-top: none;
 }
 
 .modal-actions button {
