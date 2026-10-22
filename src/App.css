@@ -67,7 +67,9 @@ input::placeholder {
 
 .error {
   margin: 10px 0 0;
+
   color: #ff5a5a;
+
   font-size: 12px;
   text-align: left;
 }
@@ -362,18 +364,30 @@ input[type="number"] {
 }
 
 .sign-out {
-  padding: 6px 13px;
+  padding: 3px 10px;
 
-  border-radius: 7px;
+  border-radius: 6px;
 
   font-size: 11px;
 }
 
+
+/*
+ * Full-width divider.
+ *
+ * The dashboard has 35px padding on each side,
+ * so we add 70px to the width and move the line
+ * 35px to the left.
+ */
+
 .divider {
-  width: 100%;
+  position: relative;
+
+  width: calc(100% + 70px);
   height: 1px;
 
   margin-top: 15px;
+  margin-left: -35px;
 
   background: #fff;
 }
@@ -390,6 +404,8 @@ input[type="number"] {
   gap: 8px;
 
   padding: 12px 0;
+
+  margin-top: 0px;
 }
 
 .table-controls select {
@@ -1277,7 +1293,6 @@ input[type="number"] {
 
   margin-top: 16px;
 
-  /* no divider above these buttons */
   padding-top: 0;
   border-top: none;
 }
@@ -1329,6 +1344,16 @@ input[type="number"] {
 @media (max-width: 800px) {
   .dashboard {
     padding: 20px 15px 80px;
+  }
+
+  /*
+   * Dashboard padding changes from 35px to 15px,
+   * so adjust the full-width divider accordingly.
+   */
+
+  .divider {
+    width: calc(100% + 30px);
+    margin-left: -15px;
   }
 
   .account-table {
