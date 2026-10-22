@@ -60,7 +60,9 @@ input::placeholder {
 }
 
 
-/* remove number tickers */
+/* =========================
+   NUMBER INPUTS
+   ========================= */
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
@@ -74,7 +76,154 @@ input[type="number"] {
 }
 
 
-/* login */
+/* =========================
+   DASHBOARD ENTRANCE
+   ========================= */
+
+@keyframes sequence-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-header {
+  opacity: 0;
+  animation: sequence-in 280ms ease-out forwards;
+}
+
+.divider {
+  opacity: 0;
+  animation: sequence-in 280ms ease-out 60ms forwards;
+}
+
+.table-controls {
+  opacity: 0;
+  animation: sequence-in 280ms ease-out 120ms forwards;
+}
+
+.account-header-row {
+  opacity: 0;
+  animation: sequence-in 280ms ease-out 190ms forwards;
+}
+
+.account-row {
+  opacity: 0;
+  animation: sequence-in 280ms ease-out forwards;
+}
+
+.add-button {
+  opacity: 0;
+  animation: sequence-in 280ms ease-out 350ms forwards;
+}
+
+
+/* =========================
+   MODAL ANIMATIONS
+   ========================= */
+
+@keyframes backdrop-in {
+  from {
+    background: rgba(0, 0, 0, 0);
+  }
+
+  to {
+    background: rgba(0, 0, 0, 0.82);
+  }
+}
+
+@keyframes backdrop-out {
+  from {
+    background: rgba(0, 0, 0, 0.82);
+  }
+
+  to {
+    background: rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modal-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+}
+
+
+/* =========================
+   EDIT ANIMATIONS
+   ========================= */
+
+@keyframes edit-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes edit-pop-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(3px) scale(0.94);
+  }
+}
+
+.edit-pop {
+  transform-origin: left center;
+
+  animation:
+    edit-pop-in
+    160ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
+}
+
+.edit-pop-closing {
+  pointer-events: none;
+
+  animation:
+    edit-pop-out
+    160ms
+    ease-in
+    forwards;
+}
+
+
+/* =========================
+   LOGIN
+   ========================= */
 
 .login-page {
   width: 100%;
@@ -115,7 +264,9 @@ input[type="number"] {
 }
 
 
-/* dashboard */
+/* =========================
+   DASHBOARD
+   ========================= */
 
 .dashboard {
   width: 100%;
@@ -157,7 +308,9 @@ input[type="number"] {
 }
 
 
-/* filter / sort */
+/* =========================
+   FILTER / SORT
+   ========================= */
 
 .table-controls {
   display: flex;
@@ -209,7 +362,9 @@ input[type="number"] {
 }
 
 
-/* table */
+/* =========================
+   TABLE
+   ========================= */
 
 .account-table {
   width: 100%;
@@ -274,7 +429,9 @@ input[type="number"] {
 }
 
 
-/* profile */
+/* =========================
+   PROFILE
+   ========================= */
 
 .pfp-cell {
   justify-content: center;
@@ -324,7 +481,9 @@ input[type="number"] {
 }
 
 
-/* status */
+/* =========================
+   STATUS
+   ========================= */
 
 .status-cell {
   gap: 8px;
@@ -350,7 +509,9 @@ input[type="number"] {
 }
 
 
-/* time */
+/* =========================
+   TIME
+   ========================= */
 
 .time-cell,
 .date-cell {
@@ -361,17 +522,17 @@ input[type="number"] {
   display: flex;
   align-items: center;
 
-  gap: 10px;
+  gap: 8px;
 }
 
 .time-input {
-  width: 48px;
-  height: 32px;
+  width: 46px;
+  height: 28px;
 
-  padding: 0 8px;
+  padding: 0 7px;
 
   border: 1px solid #fff;
-  border-radius: 6px;
+  border-radius: 5px;
 
   text-align: left;
 }
@@ -380,15 +541,17 @@ input[type="number"] {
   display: flex;
   align-items: center;
 
-  gap: 6px;
+  gap: 5px;
 }
 
 
-/* edit */
+/* =========================
+   EDIT BUTTONS
+   ========================= */
 
 .icon-button {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
 
   display: flex;
   align-items: center;
@@ -396,13 +559,19 @@ input[type="number"] {
 
   padding: 0;
 
-  border: 1px solid #555;
-  border-radius: 6px;
+  border: 1px solid #444;
+  border-radius: 5px;
 
   background: #000;
-  color: #bbb;
+  color: #aaa;
 
-  font-size: 15px;
+  font-size: 13px;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .icon-button:hover {
@@ -410,11 +579,13 @@ input[type="number"] {
 
   background: #fff;
   color: #000;
+
+  transform: scale(1.04);
 }
 
 .edit-action-button {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
 
   display: flex;
   align-items: center;
@@ -422,33 +593,66 @@ input[type="number"] {
 
   padding: 0;
 
-  border: 1px solid #555;
-  border-radius: 6px;
+  border: 1px solid #444;
+  border-radius: 5px;
 
   background: #000;
 
-  font-size: 16px;
+  font-size: 13px;
   font-weight: bold;
+  line-height: 1;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
 }
+
+
+/* save check */
 
 .save-action {
   color: #43d17a;
 }
 
-.cancel-action {
-  color: #ff4040;
+.save-action:hover:not(:disabled) {
+  border-color: #43d17a;
+
+  background: #43d17a;
+  color: #000;
+
+  transform: scale(1.04);
 }
 
 
-/* remove */
+/* cancel x */
+
+.cancel-action {
+  color: #ff5a5a;
+}
+
+.cancel-action:hover:not(:disabled) {
+  border-color: #ff5a5a;
+
+  background: #ff5a5a;
+  color: #000;
+
+  transform: scale(1.04);
+}
+
+
+/* =========================
+   REMOVE
+   ========================= */
 
 .remove-cell {
   justify-content: center;
 }
 
 .remove-button {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
 
   display: flex;
   align-items: center;
@@ -456,18 +660,36 @@ input[type="number"] {
 
   padding: 0;
 
-  border: 1px solid #555;
-  border-radius: 6px;
+  border: 1px solid #444;
+  border-radius: 5px;
 
   background: #000;
-  color: #ff4040;
+  color: #ff5a5a;
 
-  font-size: 17px;
+  font-size: 14px;
   font-weight: bold;
+  line-height: 1;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.remove-button:hover {
+  border-color: #ff5a5a;
+
+  background: #ff5a5a;
+  color: #000;
+
+  transform: scale(1.04);
 }
 
 
-/* plus */
+/* =========================
+   PLUS BUTTON
+   ========================= */
 
 .add-button {
   position: fixed;
@@ -502,7 +724,9 @@ input[type="number"] {
 }
 
 
-/* modal backdrop */
+/* =========================
+   MODAL BACKDROP
+   ========================= */
 
 .modal-backdrop {
   position: fixed;
@@ -517,10 +741,26 @@ input[type="number"] {
   background: rgba(0, 0, 0, 0.82);
 
   z-index: 200;
+
+  animation:
+    backdrop-in
+    200ms
+    ease-out
+    forwards;
+}
+
+.modal-backdrop-closing {
+  animation:
+    backdrop-out
+    200ms
+    ease-in
+    forwards;
 }
 
 
-/* add modal */
+/* =========================
+   ADD MODAL
+   ========================= */
 
 .add-modal {
   width: 100%;
@@ -537,6 +777,24 @@ input[type="number"] {
   border-radius: 12px;
 
   text-align: left;
+
+  transform-origin: center;
+
+  animation:
+    modal-in
+    200ms
+    cubic-bezier(0.22, 1, 0.36, 1)
+    forwards;
+}
+
+.add-modal-closing {
+  pointer-events: none;
+
+  animation:
+    modal-out
+    200ms
+    ease-in
+    forwards;
 }
 
 .add-modal-header {
@@ -583,7 +841,9 @@ input[type="number"] {
 }
 
 
-/* steam url */
+/* =========================
+   STEAM URL
+   ========================= */
 
 .steam-url-section {
   padding: 16px 0 14px;
@@ -623,7 +883,9 @@ input[type="number"] {
 }
 
 
-/* cooldown section */
+/* =========================
+   COOLDOWN SECTION
+   ========================= */
 
 .cooldown-section {
   margin-top: 2px;
@@ -677,7 +939,9 @@ input[type="number"] {
 }
 
 
-/* pastel pink checkbox */
+/* =========================
+   PASTEL CHECKBOX
+   ========================= */
 
 .custom-checkbox {
   width: 21px;
@@ -716,7 +980,9 @@ input[type="number"] {
 }
 
 
-/* duration */
+/* =========================
+   DURATION
+   ========================= */
 
 .cooldown-inputs {
   display: grid;
@@ -791,7 +1057,9 @@ input[type="number"] {
 }
 
 
-/* actions */
+/* =========================
+   MODAL ACTIONS
+   ========================= */
 
 .modal-actions {
   display: flex;
@@ -845,7 +1113,9 @@ input[type="number"] {
 }
 
 
-/* mobile */
+/* =========================
+   MOBILE
+   ========================= */
 
 @media (max-width: 800px) {
   .dashboard {
@@ -898,5 +1168,31 @@ input[type="number"] {
 @media (max-width: 450px) {
   .cooldown-inputs {
     grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================
+   REDUCED MOTION
+   ========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-header,
+  .divider,
+  .table-controls,
+  .account-header-row,
+  .account-row,
+  .add-button,
+  .modal-backdrop,
+  .modal-backdrop-closing,
+  .add-modal,
+  .add-modal-closing,
+  .edit-pop,
+  .edit-pop-closing {
+    opacity: 1;
+
+    animation: none;
+
+    transform: none;
   }
 }

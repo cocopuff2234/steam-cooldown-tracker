@@ -30,11 +30,15 @@ type SortOption =
 
 const PROFILE_REFRESH_INTERVAL = 12 * 60 * 60 * 1000
 const PROFILE_BATCH_SIZE = 100
+const MODAL_ANIMATION_TIME = 200
+const EDIT_ANIMATION_TIME = 160
 
 function Accounts() {
   const [accounts, setAccounts] = useState<SteamAccount[]>([])
   const [signedInUsername, setSignedInUsername] = useState('')
+
   const [showForm, setShowForm] = useState(false)
+  const [closingForm, setClosingForm] = useState(false)
 
   const [steamUrl, setSteamUrl] = useState('')
   const [hasCooldown, setHasCooldown] = useState(false)
@@ -42,6 +46,7 @@ function Accounts() {
   const [cooldownHours, setCooldownHours] = useState('0')
 
   const [editingAccount, setEditingAccount] = useState<number | null>(null)
+  const [editingClosing, setEditingClosing] = useState(false)
   const [newCooldownDays, setNewCooldownDays] = useState('')
   const [newCooldownHours, setNewCooldownHours] = useState('')
 
@@ -95,7 +100,6 @@ function Accounts() {
     const loadedAccounts = (data ?? []) as SteamAccount[]
 
     setAccounts(loadedAccounts)
-
     await refreshStaleProfiles(loadedAccounts)
   }
 
@@ -251,11 +255,14 @@ function Accounts() {
       return '—'
     }
 
-    return new Date(cooldownUntil).toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
+    return new Date(cooldownUntil).toLocaleDateString(
+      undefined,
+      {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }
+    )
   }
 
   function getVisibleAccounts() {
@@ -290,7 +297,10 @@ function Accounts() {
       }
 
       if (sort === 'date-asc') {
-        if (!a.cooldown_until && !b.cooldown_until) return 0
+        if (!a.cooldown_until && !b.cooldown_until) {
+          return 0
+        }
+
         if (!a.cooldown_until) return -1
         if (!b.cooldown_until) return 1
 
@@ -306,24 +316,78 @@ function Accounts() {
     return visibleAccounts
   }
 
-  function closeAddForm() {
+  function openAddForm() {
+    setClosingForm(false)
+    setShowForm(true)
+  }
+
+  function resetAddForm() {
     setSteamUrl('')
     setHasCooldown(false)
     setCooldownDays('1')
     setCooldownHours('0')
-    setShowForm(false)
     setLoading(false)
     setError('')
   }
 
-  async function handleAddAccount(e: React.FormEvent) {
+  function closeAddForm() {
+    if (closingForm) return
+
+    setClosingForm(true)
+
+    window.setTimeout(() => {
+      setShowForm(false)
+      setClosingForm(false)
+      resetAddForm()
+    }, MODAL_ANIMATION_TIME)
+  }
+
+  function openCooldownEditor(
+    account: SteamAccount
+  ) {
+    const timeLeft =
+      getTimeLeft(account.cooldown_until)
+
+    setEditingClosing(false)
+    setEditingAccount(account.id)
+    setNewCooldownDays(String(timeLeft.days))
+    setNewCooldownHours(String(timeLeft.hours))
+  }
+
+  function finishClosingEditor() {
+    setEditingAccount(null)
+    setEditingClosing(false)
+    setNewCooldownDays('')
+    setNewCooldownHours('')
+  }
+
+  function closeCooldownEditor() {
+    if (
+      editingAccount === null ||
+      editingClosing
+    ) {
+      return
+    }
+
+    setEditingClosing(true)
+
+    window.setTimeout(() => {
+      finishClosingEditor()
+    }, EDIT_ANIMATION_TIME)
+  }
+
+  async function handleAddAccount(
+    e: React.FormEvent
+  ) {
     e.preventDefault()
 
     setLoading(true)
     setError('')
 
-    const { data: userData, error: userError } =
-      await supabase.auth.getUser()
+    const {
+      data: userData,
+      error: userError,
+    } = await supabase.auth.getUser()
 
     if (userError || !userData.user) {
       console.error('User error:', userError)
@@ -365,15 +429,21 @@ function Accounts() {
         return
       }
 
-      cooldownUntil = calculateCooldownUntil(days, hours)
+      cooldownUntil =
+        calculateCooldownUntil(days, hours)
     }
 
-    const { data: profile, error: functionError } =
-      await supabase.functions.invoke('steam-profile', {
+    const {
+      data: profile,
+      error: functionError,
+    } = await supabase.functions.invoke(
+      'steam-profile',
+      {
         body: {
           url: steamUrl,
         },
-      })
+      }
+    )
 
     if (functionError) {
       console.error('Function error:', functionError)
@@ -384,7 +454,8 @@ function Accounts() {
 
     if (!profile || profile.error) {
       setError(
-        profile?.error ?? 'could not find steam profile'
+        profile?.error ??
+          'could not find steam profile'
       )
       setLoading(false)
       return
@@ -392,17 +463,18 @@ function Accounts() {
 
     const now = new Date().toISOString()
 
-    const { error: insertError } = await supabase
-      .from('steam_accounts')
-      .insert({
-        user_id: userData.user.id,
-        steam_id: profile.steamId,
-        steam_url: profile.profileUrl,
-        name: profile.name,
-        avatar_url: profile.avatarUrl,
-        cooldown_until: cooldownUntil,
-        profile_updated_at: now,
-      })
+    const { error: insertError } =
+      await supabase
+        .from('steam_accounts')
+        .insert({
+          user_id: userData.user.id,
+          steam_id: profile.steamId,
+          steam_url: profile.profileUrl,
+          name: profile.name,
+          avatar_url: profile.avatarUrl,
+          cooldown_until: cooldownUntil,
+          profile_updated_at: now,
+        })
 
     if (insertError) {
       console.error('Insert error:', insertError)
@@ -411,8 +483,16 @@ function Accounts() {
       return
     }
 
-    closeAddForm()
-    await getAccounts()
+    setLoading(false)
+    setClosingForm(true)
+
+    window.setTimeout(async () => {
+      setShowForm(false)
+      setClosingForm(false)
+      resetAddForm()
+
+      await getAccounts()
+    }, MODAL_ANIMATION_TIME)
   }
 
   async function handleSetCooldown(id: number) {
@@ -453,11 +533,12 @@ function Accounts() {
       return
     }
 
-    setEditingAccount(null)
-    setNewCooldownDays('')
-    setNewCooldownHours('')
+    setEditingClosing(true)
 
-    await getAccounts()
+    window.setTimeout(async () => {
+      finishClosingEditor()
+      await getAccounts()
+    }, EDIT_ANIMATION_TIME)
   }
 
   async function handleRemove(id: number) {
@@ -478,7 +559,8 @@ function Accounts() {
     await supabase.auth.signOut()
   }
 
-  const visibleAccounts = getVisibleAccounts()
+  const visibleAccounts =
+    getVisibleAccounts()
 
   return (
     <main className="dashboard">
@@ -503,7 +585,9 @@ function Accounts() {
         <select
           value={filter}
           onChange={(e) =>
-            setFilter(e.target.value as FilterOption)
+            setFilter(
+              e.target.value as FilterOption
+            )
           }
         >
           <option value="all">all accounts</option>
@@ -514,7 +598,9 @@ function Accounts() {
         <select
           value={sort}
           onChange={(e) =>
-            setSort(e.target.value as SortOption)
+            setSort(
+              e.target.value as SortOption
+            )
           }
         >
           <option value="time-asc">time ↑</option>
@@ -535,169 +621,215 @@ function Accounts() {
           <div className="table-cell"></div>
         </div>
 
-        {visibleAccounts.map((account) => {
-          const timeLeft =
-            getTimeLeft(account.cooldown_until)
+        {visibleAccounts.map(
+          (account, index) => {
+            const timeLeft =
+              getTimeLeft(
+                account.cooldown_until
+              )
 
-          const onCooldown =
-            timeLeft.milliseconds > 0
+            const onCooldown =
+              timeLeft.milliseconds > 0
 
-          return (
-            <div
-              className="account-row"
-              key={account.id}
-            >
-              <div className="table-cell pfp-cell">
-                {account.avatar_url && (
+            const isEditing =
+              editingAccount === account.id
+
+            return (
+              <div
+                className="account-row"
+                key={account.id}
+                style={{
+                  animationDelay: `${
+                    260 + index * 60
+                  }ms`,
+                }}
+              >
+                <div className="table-cell pfp-cell">
+                  {account.avatar_url && (
+                    <a
+                      href={account.steam_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        className="pfp"
+                        src={account.avatar_url}
+                        alt={
+                          account.name ??
+                          'steam profile'
+                        }
+                      />
+                    </a>
+                  )}
+                </div>
+
+                <div className="table-cell name-cell">
                   <a
+                    className="profile-link"
                     href={account.steam_url}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <img
-                      className="pfp"
-                      src={account.avatar_url}
-                      alt={account.name ?? 'steam profile'}
-                    />
+                    {account.name ?? 'unknown'}
                   </a>
-                )}
-              </div>
+                </div>
 
-              <div className="table-cell name-cell">
-                <a
-                  className="profile-link"
-                  href={account.steam_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {account.name ?? 'unknown'}
-                </a>
-              </div>
+                <div className="table-cell status-cell">
+                  {onCooldown ? (
+                    <>
+                      <span className="status-icon cooldown-icon">
+                        ✕
+                      </span>
+                      <span>cooldown</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="status-icon active-icon">
+                        ✓
+                      </span>
+                      <span>active</span>
+                    </>
+                  )}
+                </div>
 
-              <div className="table-cell status-cell">
-                {onCooldown ? (
-                  <>
-                    <span className="status-icon cooldown-icon">
-                      ✕
-                    </span>
-                    <span>cooldown</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="status-icon active-icon">
-                      ✓
-                    </span>
-                    <span>active</span>
-                  </>
-                )}
-              </div>
+                <div className="table-cell time-cell">
+                  {isEditing ? (
+                    <div
+                      className={`edit-pop ${
+                        editingClosing
+                          ? 'edit-pop-closing'
+                          : ''
+                      }`}
+                    >
+                      <input
+                        className="time-input"
+                        type="number"
+                        min="0"
+                        value={newCooldownDays}
+                        onChange={(e) =>
+                          setNewCooldownDays(
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+                  ) : (
+                    <span>{timeLeft.days}</span>
+                  )}
+                </div>
 
-              <div className="table-cell time-cell">
-                {editingAccount === account.id ? (
-                  <input
-                    className="time-input"
-                    type="number"
-                    min="0"
-                    value={newCooldownDays}
-                    onChange={(e) =>
-                      setNewCooldownDays(e.target.value)
+                <div className="table-cell time-cell">
+                  {isEditing ? (
+                    <div
+                      className={`hours-edit edit-pop ${
+                        editingClosing
+                          ? 'edit-pop-closing'
+                          : ''
+                      }`}
+                    >
+                      <input
+                        className="time-input"
+                        type="number"
+                        min="0"
+                        max="23"
+                        value={newCooldownHours}
+                        onChange={(e) =>
+                          setNewCooldownHours(
+                            e.target.value
+                          )
+                        }
+                      />
+
+                      <button
+                        className="edit-action-button save-action"
+                        title="save"
+                        disabled={editingClosing}
+                        onClick={() =>
+                          handleSetCooldown(
+                            account.id
+                          )
+                        }
+                      >
+                        ✓
+                      </button>
+
+                      <button
+                        className="edit-action-button cancel-action"
+                        title="cancel"
+                        disabled={editingClosing}
+                        onClick={
+                          closeCooldownEditor
+                        }
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="hours-display">
+                      <span>
+                        {timeLeft.hours}
+                      </span>
+
+                      <button
+                        className="icon-button"
+                        title="edit cooldown"
+                        onClick={() =>
+                          openCooldownEditor(
+                            account
+                          )
+                        }
+                      >
+                        ✎
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="table-cell date-cell">
+                  {getDateFree(
+                    account.cooldown_until
+                  )}
+                </div>
+
+                <div className="table-cell remove-cell">
+                  <button
+                    className="remove-button"
+                    title="remove account"
+                    onClick={() =>
+                      handleRemove(account.id)
                     }
-                  />
-                ) : (
-                  <span>{timeLeft.days}</span>
-                )}
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
-
-              <div className="table-cell time-cell">
-                {editingAccount === account.id ? (
-                  <div className="hours-edit">
-                    <input
-                      className="time-input"
-                      type="number"
-                      min="0"
-                      max="23"
-                      value={newCooldownHours}
-                      onChange={(e) =>
-                        setNewCooldownHours(e.target.value)
-                      }
-                    />
-
-                    <button
-                      className="edit-action-button save-action"
-                      title="save"
-                      onClick={() =>
-                        handleSetCooldown(account.id)
-                      }
-                    >
-                      ✓
-                    </button>
-
-                    <button
-                      className="edit-action-button cancel-action"
-                      title="cancel"
-                      onClick={() => {
-                        setEditingAccount(null)
-                        setNewCooldownDays('')
-                        setNewCooldownHours('')
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ) : (
-                  <div className="hours-display">
-                    <span>{timeLeft.hours}</span>
-
-                    <button
-                      className="icon-button"
-                      title="edit cooldown"
-                      onClick={() => {
-                        setEditingAccount(account.id)
-                        setNewCooldownDays(
-                          String(timeLeft.days)
-                        )
-                        setNewCooldownHours(
-                          String(timeLeft.hours)
-                        )
-                      }}
-                    >
-                      ✎
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="table-cell date-cell">
-                {getDateFree(account.cooldown_until)}
-              </div>
-
-              <div className="table-cell remove-cell">
-                <button
-                  className="remove-button"
-                  title="remove account"
-                  onClick={() =>
-                    handleRemove(account.id)
-                  }
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          )
-        })}
+            )
+          }
+        )}
       </div>
 
       {showForm && (
         <div
-          className="modal-backdrop"
+          className={`modal-backdrop ${
+            closingForm
+              ? 'modal-backdrop-closing'
+              : ''
+          }`}
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) {
+            if (
+              e.target ===
+              e.currentTarget
+            ) {
               closeAddForm()
             }
           }}
         >
           <form
-            className="add-modal"
+            className={`add-modal ${
+              closingForm
+                ? 'add-modal-closing'
+                : ''
+            }`}
             onSubmit={handleAddAccount}
           >
             <div className="add-modal-header">
@@ -723,7 +855,9 @@ function Accounts() {
                 type="url"
                 value={steamUrl}
                 onChange={(e) =>
-                  setSteamUrl(e.target.value)
+                  setSteamUrl(
+                    e.target.value
+                  )
                 }
                 placeholder="https://steamcommunity.com/id/..."
                 required
@@ -740,7 +874,9 @@ function Accounts() {
                     type="checkbox"
                     checked={hasCooldown}
                     onChange={(e) =>
-                      setHasCooldown(e.target.checked)
+                      setHasCooldown(
+                        e.target.checked
+                      )
                     }
                   />
 
@@ -748,12 +884,16 @@ function Accounts() {
                     ✓
                   </span>
 
-                  <span>enable cooldown</span>
+                  <span>
+                    enable cooldown
+                  </span>
                 </label>
 
                 <div
                   className={`cooldown-inputs ${
-                    !hasCooldown ? 'disabled' : ''
+                    !hasCooldown
+                      ? 'disabled'
+                      : ''
                   }`}
                 >
                   <div className="duration-input">
@@ -763,7 +903,9 @@ function Accounts() {
                       min="0"
                       value={cooldownDays}
                       onChange={(e) =>
-                        setCooldownDays(e.target.value)
+                        setCooldownDays(
+                          e.target.value
+                        )
                       }
                       aria-label="cooldown days"
                       disabled={!hasCooldown}
@@ -781,7 +923,9 @@ function Accounts() {
                       max="23"
                       value={cooldownHours}
                       onChange={(e) =>
-                        setCooldownHours(e.target.value)
+                        setCooldownHours(
+                          e.target.value
+                        )
                       }
                       aria-label="cooldown hours"
                       disabled={!hasCooldown}
@@ -812,7 +956,10 @@ function Accounts() {
               <button
                 type="submit"
                 className="primary-button"
-                disabled={loading}
+                disabled={
+                  loading ||
+                  closingForm
+                }
               >
                 {loading
                   ? 'adding...'
@@ -826,7 +973,7 @@ function Accounts() {
       {!showForm && (
         <button
           className="add-button"
-          onClick={() => setShowForm(true)}
+          onClick={openAddForm}
           title="add account"
         >
           +
