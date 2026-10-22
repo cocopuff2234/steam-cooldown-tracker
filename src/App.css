@@ -17,11 +17,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-
-/* =========================
-   GENERAL
-   ========================= */
-
 button,
 input,
 select {
@@ -58,15 +53,14 @@ input::placeholder {
 }
 
 .error {
-  margin: 0;
+  margin: 10px 0 0;
   color: #ff5a5a;
   font-size: 12px;
+  text-align: left;
 }
 
 
-/* =========================
-   REMOVE NUMBER TICKERS
-   ========================= */
+/* remove number tickers */
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
@@ -80,9 +74,7 @@ input[type="number"] {
 }
 
 
-/* =========================
-   LOGIN
-   ========================= */
+/* login */
 
 .login-page {
   width: 100%;
@@ -123,9 +115,7 @@ input[type="number"] {
 }
 
 
-/* =========================
-   DASHBOARD
-   ========================= */
+/* dashboard */
 
 .dashboard {
   width: 100%;
@@ -167,9 +157,7 @@ input[type="number"] {
 }
 
 
-/* =========================
-   FILTER / SORT
-   ========================= */
+/* filter / sort */
 
 .table-controls {
   display: flex;
@@ -220,16 +208,8 @@ input[type="number"] {
   border-color: #fff;
 }
 
-.table-controls select:hover {
-  background-image:
-    linear-gradient(45deg, transparent 50%, #fff 50%),
-    linear-gradient(135deg, #fff 50%, transparent 50%);
-}
 
-
-/* =========================
-   TABLE
-   ========================= */
+/* table */
 
 .account-table {
   width: 100%;
@@ -285,6 +265,8 @@ input[type="number"] {
   padding: 10px 14px;
 
   border-right: 1px solid #333;
+
+  text-align: left;
 }
 
 .table-cell:last-child {
@@ -292,9 +274,7 @@ input[type="number"] {
 }
 
 
-/* =========================
-   PROFILE
-   ========================= */
+/* profile */
 
 .pfp-cell {
   justify-content: center;
@@ -344,9 +324,7 @@ input[type="number"] {
 }
 
 
-/* =========================
-   STATUS
-   ========================= */
+/* status */
 
 .status-cell {
   gap: 8px;
@@ -372,9 +350,7 @@ input[type="number"] {
 }
 
 
-/* =========================
-   TIME
-   ========================= */
+/* time */
 
 .time-cell,
 .date-cell {
@@ -408,9 +384,7 @@ input[type="number"] {
 }
 
 
-/* =========================
-   EDIT COOLDOWN
-   ========================= */
+/* edit */
 
 .icon-button {
   width: 30px;
@@ -455,35 +429,18 @@ input[type="number"] {
 
   font-size: 16px;
   font-weight: bold;
-  line-height: 1;
 }
 
 .save-action {
   color: #43d17a;
 }
 
-.save-action:hover {
-  border-color: #43d17a;
-
-  background: #43d17a;
-  color: #000;
-}
-
 .cancel-action {
   color: #ff4040;
 }
 
-.cancel-action:hover {
-  border-color: #ff4040;
 
-  background: #ff4040;
-  color: #000;
-}
-
-
-/* =========================
-   REMOVE
-   ========================= */
+/* remove */
 
 .remove-cell {
   justify-content: center;
@@ -507,20 +464,10 @@ input[type="number"] {
 
   font-size: 17px;
   font-weight: bold;
-  line-height: 1;
-}
-
-.remove-button:hover {
-  border-color: #ff4040;
-
-  background: #ff4040;
-  color: #000;
 }
 
 
-/* =========================
-   PLUS BUTTON
-   ========================= */
+/* plus */
 
 .add-button {
   position: fixed;
@@ -545,8 +492,6 @@ input[type="number"] {
   color: #000;
 
   font-size: 28px;
-  font-weight: 300;
-  line-height: 1;
 
   z-index: 100;
 }
@@ -557,9 +502,7 @@ input[type="number"] {
 }
 
 
-/* =========================
-   ADD ACCOUNT MODAL
-   ========================= */
+/* modal backdrop */
 
 .modal-backdrop {
   position: fixed;
@@ -571,109 +514,142 @@ input[type="number"] {
 
   padding: 20px;
 
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.82);
 
   z-index: 200;
 }
 
+
+/* add modal */
+
 .add-modal {
   width: 100%;
-  max-width: 390px;
+  max-width: 520px;
 
   display: flex;
   flex-direction: column;
 
-  gap: 20px;
+  padding: 22px 24px;
 
-  padding: 22px;
+  background: #080808;
 
-  background: #000;
-
-  border: 1px solid #fff;
+  border: 1px solid #555;
   border-radius: 12px;
+
+  text-align: left;
 }
-
-
-/* =========================
-   MODAL HEADER
-   ========================= */
 
 .add-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding-bottom: 14px;
+  padding-bottom: 16px;
 
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #282828;
 }
 
 .add-modal-header h2 {
   margin: 0;
 
-  font-size: 16px;
-  font-weight: 400;
-}
-
-.close-button {
-  width: 28px;
-  height: 28px;
-
-  padding: 0;
-
-  border: none;
-  border-radius: 5px;
-
-  font-size: 22px;
-  line-height: 1;
-}
-
-.close-button:hover {
-  background: #222;
-  color: #fff;
-}
-
-
-/* =========================
-   MODAL FORM
-   ========================= */
-
-.form-field {
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-
-  align-items: flex-start;
-
-  gap: 7px;
-}
-
-.form-field label {
-  width: 100%;
-
-  color: #aaa;
-
-  font-size: 11px;
+  font-size: 19px;
+  font-weight: 600;
 
   text-align: left;
 }
 
-.form-field > input {
-  width: 100%;
-  height: 38px;
+.close-button {
+  width: 30px;
+  height: 30px;
 
-  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  border-radius: 7px;
+  padding: 0;
 
-  font-size: 12px;
+  border: none;
+
+  background: transparent;
+  color: #aaa;
+
+  font-size: 25px;
+  font-weight: 300;
+}
+
+.close-button:hover {
+  background: transparent;
+  color: #fff;
 }
 
 
-/* =========================
-   COOLDOWN CHECKBOX
-   ========================= */
+/* steam url */
+
+.steam-url-section {
+  padding: 16px 0 14px;
+}
+
+.steam-url-section label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #fff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-align: left;
+}
+
+.steam-url-section input {
+  width: 100%;
+  height: 42px;
+
+  padding: 0 12px;
+
+  border: 1px solid #444;
+  border-radius: 8px;
+
+  background: #0b0b0b;
+
+  font-size: 12px;
+
+  text-align: left;
+}
+
+.steam-url-section input:focus {
+  border-color: #888;
+}
+
+
+/* cooldown section */
+
+.cooldown-section {
+  margin-top: 2px;
+}
+
+.cooldown-section > h3 {
+  margin: 0 0 7px;
+
+  color: #fff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-align: left;
+}
+
+.cooldown-card {
+  padding: 15px 17px;
+
+  border: 1px solid #292929;
+  border-radius: 10px;
+
+  background: #090909;
+
+  text-align: left;
+}
 
 .cooldown-toggle {
   display: flex;
@@ -691,55 +667,131 @@ input[type="number"] {
 }
 
 .cooldown-toggle input {
-  width: 15px;
-  height: 15px;
+  position: absolute;
 
-  margin: 0;
+  width: 1px;
+  height: 1px;
 
-  accent-color: #fff;
+  opacity: 0;
+  pointer-events: none;
 }
 
 
-/* =========================
-   COOLDOWN TIME
-   ========================= */
+/* pastel pink checkbox */
 
-.cooldown-time-fields {
+.custom-checkbox {
+  width: 21px;
+  height: 21px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: 1px solid #8c747d;
+  border-radius: 6px;
+
+  background: #171216;
+  color: transparent;
+
+  font-size: 14px;
+  font-weight: bold;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.cooldown-toggle input:checked + .custom-checkbox {
+  border-color: #f2b8cf;
+
+  background: #f2b8cf;
+  color: #5b3545;
+}
+
+.cooldown-toggle:hover .custom-checkbox {
+  border-color: #f2b8cf;
+}
+
+
+/* duration */
+
+.cooldown-inputs {
   display: grid;
 
   grid-template-columns: 1fr 1fr;
 
-  gap: 18px;
+  gap: 12px;
+
+  margin-top: 12px;
+
+  transition: opacity 0.15s ease;
 }
 
-.time-field-row {
-  display: flex;
+.cooldown-inputs.disabled {
+  opacity: 0.35;
+}
+
+.duration-input {
+  height: 42px;
+
+  display: grid;
+
+  grid-template-columns: 1fr auto;
+
   align-items: center;
 
-  gap: 8px;
+  overflow: hidden;
+
+  border: 1px solid #444;
+  border-radius: 8px;
+
+  background: #0b0b0b;
 }
 
-.time-field-row input {
-  width: 65px;
-  height: 36px;
+.duration-input:focus-within {
+  border-color: #888;
+}
 
-  padding: 0 10px;
+.duration-input input {
+  width: 100%;
+  height: 100%;
 
-  border-radius: 7px;
+  padding: 0 12px;
+
+  border: none;
+
+  background: transparent;
+
+  font-size: 13px;
 
   text-align: left;
 }
 
-.time-field-row span {
+.duration-input input:disabled {
+  color: #aaa;
+  cursor: default;
+}
+
+.duration-input span {
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 12px;
+
+  border-left: 1px solid #333;
+
   color: #aaa;
 
-  font-size: 12px;
+  font-size: 11px;
 }
 
 
-/* =========================
-   MODAL BUTTONS
-   ========================= */
+/* actions */
 
 .modal-actions {
   display: flex;
@@ -747,39 +799,57 @@ input[type="number"] {
 
   gap: 8px;
 
-  padding-top: 5px;
+  margin-top: 16px;
+  padding-top: 14px;
+
+  border-top: 1px solid #282828;
 }
 
 .modal-actions button {
-  padding: 7px 12px;
+  min-width: 96px;
+  height: 38px;
 
-  border-radius: 7px;
+  padding: 0 16px;
+
+  border-radius: 8px;
 
   font-size: 11px;
 }
 
-.primary-button {
-  background: #fff;
-  color: #000;
+.modal-cancel {
+  border-color: #555;
+
+  background: #080808;
+  color: #ddd;
 }
 
-.primary-button:hover {
-  background: #000;
+.modal-cancel:hover {
+  border-color: #aaa;
+
+  background: #111;
   color: #fff;
 }
 
+.primary-button {
+  border-color: #fff;
 
-/* =========================
-   MOBILE
-   ========================= */
+  background: #fff;
+  color: #000;
+
+  font-weight: 600;
+}
+
+.primary-button:hover {
+  background: #ddd;
+  color: #000;
+}
+
+
+/* mobile */
 
 @media (max-width: 800px) {
   .dashboard {
     padding: 20px 15px 80px;
-  }
-
-  .table-controls {
-    justify-content: flex-start;
   }
 
   .account-table {
@@ -810,7 +880,23 @@ input[type="number"] {
     bottom: 20px;
   }
 
-  .cooldown-time-fields {
+  .add-modal {
+    padding: 20px;
+
+    max-width: 480px;
+  }
+
+  .cooldown-inputs {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .modal-actions {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 450px) {
+  .cooldown-inputs {
     grid-template-columns: 1fr;
   }
 }
