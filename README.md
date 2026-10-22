@@ -1,32 +1,30 @@
-# React + TypeScript + Vite
+# steam cooldown tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+a simple web app for tracking cooldowns across multiple steam accounts.
 
-Currently, two official plugins are available:
+## features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- add steam accounts using a steam profile url
+- automatically fetch steam names and profile pictures
+- automatically refresh steam profile information
+- track cooldowns by days and hours
+- automatically count down remaining cooldown time
+- view the date an account becomes available
+- manually edit cooldowns
+- filter accounts by active/cooldown status
+- sort accounts by time, name, or date
+- open steam profiles directly from the dashboard
+- separate account data for each signed-in user
+- responsive dark-mode interface
 
-## React Compiler
+## built with
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- react
+- typescript
+- vite
+- supabase
+- steam web api
 
-## Expanding the Oxlint configuration
+## status
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+actively developed. more account and authentication features are planned.
