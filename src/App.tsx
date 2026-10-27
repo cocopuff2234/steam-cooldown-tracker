@@ -8,6 +8,7 @@ import './App.css'
 function App() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [session, setSession] = useState<Session | null>(null)
 
@@ -72,14 +73,14 @@ function App() {
             />
           </label>
 
-          <label className="login-field">
+          <div className="login-field password-field">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
               <rect x="4" y="10" width="16" height="11" rx="2" />
               <path d="M8 10V7a4 4 0 0 1 8 0v3" />
               <path d="M12 14v3" />
             </svg>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               id="password"
               aria-label="Password"
               value={password}
@@ -87,7 +88,20 @@ function App() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-          </label>
+            <button
+              className="password-toggle"
+              type="button"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-controls="password"
+              onClick={() => setShowPassword((visible) => !visible)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                <circle cx="12" cy="12" r="3" />
+                {showPassword && <path d="m3 3 18 18" />}
+              </svg>
+            </button>
+          </div>
 
           {error && <p className="error">{error}</p>}
         </form>
