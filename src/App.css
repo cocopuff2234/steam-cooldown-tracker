@@ -74,6 +74,14 @@ input::placeholder {
   text-align: left;
 }
 
+.title {
+  top: 25px;
+  margin: 0;
+  text-align: center;
+  font-size: 32px;
+  animation: sequence-in 1000ms ease-out both;
+}
+
 
 /* =========================
    NUMBER INPUTS
@@ -299,27 +307,58 @@ input[type="number"] {
    ========================= */
 
 .login-page {
+  position: relative;
   width: 100%;
   min-height: 100vh;
 
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 24px;
 
   background: #000;
 }
 
-.login-form {
-  width: 220px;
+.login-panel {
+  width: max-content;
+  max-width: calc(100% - 32px);
 
   display: flex;
   flex-direction: column;
+  gap: 24px;
+}
+
+.login-form {
+  width: 380px;
+  max-width: 100%;
+  align-self: center;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 
   gap: 10px;
 }
 
+.login-field {
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.login-field svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 .login-form input {
   width: 100%;
+  min-width: 0;
   height: 34px;
 
   padding: 0 10px;
@@ -327,13 +366,29 @@ input[type="number"] {
   font-size: 13px;
 }
 
-.login-form button {
-  width: 75px;
-  height: 30px;
-
+.login-actions {
+  width: 380px;
+  max-width: 100%;
   align-self: center;
+  padding-left: 30px;
+
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.login-button {
+  flex: 0 1 75px;
+  min-width: 0;
+  height: 34px;
 
   font-size: 12px;
+}
+
+.forgot-password {
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 
@@ -368,6 +423,15 @@ input[type="number"] {
 
   border-radius: 6px;
 
+  font-size: 11px;
+}
+
+.sign-up {
+  position: absolute;
+  top: 25px;
+  right: 35px;
+
+  padding: 3px 10px;
   font-size: 11px;
 }
 
@@ -1427,6 +1491,7 @@ input[type="number"] {
    ========================= */
 
 @media (prefers-reduced-motion: reduce) {
+  .title,
   .dashboard-header,
   .divider,
   .table-controls,
