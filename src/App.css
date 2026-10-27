@@ -419,12 +419,37 @@ input[type="number"] {
   font-size: 12px;
 }
 
-.forgot-password {
+.forgot-password,
+.forgot-password:hover {
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #fff;
   font-size: 12px;
   white-space: nowrap;
 }
 
+
+.auth-heading {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.auth-submit {
+  flex-basis: 120px;
+}
+
+.auth-note {
+  max-width: 300px;
+  margin: 0;
+  align-self: center;
+  color: #aaa;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
 
 /* =========================
    DASHBOARD

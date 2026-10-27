@@ -3,9 +3,11 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { users } from './users'
 import Accounts from './Accounts'
+import AuthPreview from './AuthPreview'
 import './App.css'
 
 function App() {
+  const [page, setPage] = useState<'login' | 'signup' | 'forgot-password'>('login')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -51,9 +53,13 @@ function App() {
     return <Accounts />
   }
 
+  if (page !== 'login') {
+    return <AuthPreview key={page} page={page} onBack={() => setPage('login')} />
+  }
+
   return (
     <main className="login-page">
-      <button className="sign-up">sign up</button>
+      <button className="sign-up" type="button" onClick={() => setPage('signup')}>sign up</button>
       <section className="login-panel" aria-labelledby="login-title">
         <h1 className="title" id="login-title">Steam Cooldown Tracker</h1>
         <form className="login-form" id="login-form" onSubmit={handleSubmit}>
@@ -107,7 +113,7 @@ function App() {
         </form>
         <div className="login-actions">
           <button className="login-button" type="submit" form="login-form">login</button>
-          <span className="forgot-password">forgot password?</span>
+          <button className="forgot-password" type="button" onClick={() => setPage('forgot-password')}>forgot password?</button>
         </div>
       </section>
     </main>
