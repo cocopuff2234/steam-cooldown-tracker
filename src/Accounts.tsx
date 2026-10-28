@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
-import { users } from './users'
+import { getFallbackUsername } from './auth'
 
 type SteamAccount = {
   id: number
@@ -79,16 +79,18 @@ function Accounts() {
 
   async function getSignedInUsername() {
     const { data } = await supabase.auth.getUser()
-    const email = data.user?.email
+    if (!data.user) return
 
-    if (!email) return
+    setSignedInUsername(getFallbackUsername(data.user))
 
-    const username = Object.keys(users).find(
-      (name) => users[name] === email
-    )
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', data.user.id)
+      .maybeSingle()
 
-    if (username) {
-      setSignedInUsername(username)
+    if (profile?.username) {
+      setSignedInUsername(profile.username)
     }
   }
 

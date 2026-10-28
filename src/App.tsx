@@ -1,13 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { supabase } from './supabase'
-import { users } from './users'
+import { authInitialization, getRecoveryUserId, recoveryRequested, supabase } from './supabase'
+
+import { signInWithUsername } from './auth'
 import Accounts from './Accounts'
 import AuthPreview from './AuthPreview'
 import './App.css'
 
 function App() {
-  const [page, setPage] = useState<'login' | 'signup' | 'forgot-password'>('login')
+  const [page, setPage] = useState<'login' | 'signup' | 'forgot-password' | 'reset-password'>(() =>
+    recoveryRequested ? 'reset-password' : 'login'
+  )
+  const [busy, setBusy] = useState(false)
+  const requestInFlight = useRef(false)
+  const [recoveryUserId, setRecoveryUserId] = useState(getRecoveryUserId)
+  const [initializing, setInitializing] = useState(true)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -15,38 +22,76 @@ function App() {
   const [session, setSession] = useState<Session | null>(null)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    let active = true
+    authInitialization.then(async ({ error: initializationError }) => {
+      const { data, error } = await supabase.auth.getSession()
+      if (!active) return
       setSession(data.session)
+      setRecoveryUserId(initializationError ? null : getRecoveryUserId())
+      const sessionError = initializationError || error
+      if (sessionError) setError(sessionError.message)
+      setInitializing(false)
+    }).catch(() => {
+      if (!active) return
+      setError('Unable to restore your session. Please log in again.')
+      setInitializing(false)
     })
 
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session)
+      if (event === 'PASSWORD_RECOVERY') {
+        setRecoveryUserId(session?.user.id ?? null)
+        setPage('reset-password')
+      }
+      if (event === 'SIGNED_IN') {
+        setRecoveryUserId((current) => current === session?.user.id ? current : null)
+      }
+      if (event === 'SIGNED_OUT') {
+        setRecoveryUserId(null)
+        setPage((current) => current === 'reset-password' ? current : 'login')
+        setPassword('')
+        setShowPassword(false)
+      }
     })
 
     return () => {
+      active = false
       data.subscription.unsubscribe()
     }
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (requestInFlight.current) return
+    requestInFlight.current = true
     setError('')
-
-    const email = users[username.toLowerCase()]
-
-    if (!email) {
-      setError('wrong user or pw')
-      return
+    setBusy(true)
+    try {
+      await signInWithUsername(username, password)
+      setPassword('')
+      setShowPassword(false)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Unable to log in. Please try again.')
+    } finally {
+      requestInFlight.current = false
+      setBusy(false)
     }
+  }
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+  function returnToLogin() {
+    const url = new URL(window.location.href)
+    url.searchParams.delete('auth')
+    window.history.replaceState(null, '', `${url.pathname}${url.search}`)
+    setError('')
+    setPage('login')
+  }
 
-    if (error) {
-      setError('wrong user or pw')
-    }
+  if (initializing) {
+    return <main className="login-page"><p role="status">loading…</p></main>
+  }
+
+  if (page === 'reset-password') {
+    return <AuthPreview key={page} page={page} recoveryReady={Boolean(session && session.user.id === recoveryUserId)} recoveryError={error} onBack={returnToLogin} />
   }
 
   if (session) {
@@ -54,12 +99,12 @@ function App() {
   }
 
   if (page !== 'login') {
-    return <AuthPreview key={page} page={page} onBack={() => setPage('login')} />
+    return <AuthPreview key={page} page={page} onBack={returnToLogin} />
   }
 
   return (
     <main className="login-page">
-      <button className="sign-up" type="button" onClick={() => setPage('signup')}>sign up</button>
+      <button className="sign-up" type="button" disabled={busy} onClick={() => setPage('signup')}>sign up</button>
       <section className="login-panel" aria-labelledby="login-title">
         <h1 className="title" id="login-title">Steam Cooldown Tracker</h1>
         <form className="login-form" id="login-form" onSubmit={handleSubmit}>
@@ -74,6 +119,7 @@ function App() {
               aria-label="Username"
               value={username}
               placeholder="username"
+              autoComplete="username"
               onChange={(e) => setUsername(e.target.value)}
               required
             />
@@ -91,6 +137,7 @@ function App() {
               aria-label="Password"
               value={password}
               placeholder="password"
+              autoComplete="current-password"
               onChange={(e) => setPassword(e.target.value)}
               required
             />
@@ -109,11 +156,13 @@ function App() {
             </button>
           </div>
 
-          {error && <p className="error">{error}</p>}
         </form>
-        <div className="login-actions">
-          <button className="login-button" type="submit" form="login-form">login</button>
-          <button className="forgot-password" type="button" onClick={() => setPage('forgot-password')}>forgot password?</button>
+        <div className="login-footer">
+          {error && <p className="error" role="alert">{error}</p>}
+          <div className="login-actions">
+            <button className="login-button" type="submit" form="login-form" disabled={busy}>{busy ? 'logging in…' : 'login'}</button>
+            <button className="forgot-password" type="button" disabled={busy} onClick={() => setPage('forgot-password')}>forgot password?</button>
+          </div>
         </div>
       </section>
     </main>

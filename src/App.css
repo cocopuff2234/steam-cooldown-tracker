@@ -329,7 +329,28 @@ input[type="number"] {
   gap: 24px;
 }
 
+.login-panel .error {
+  margin: 0;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.login-footer {
+  contain: inline-size;
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-footer:has(> .error) {
+  margin-top: -18px;
+}
+
 .login-form {
+  contain: inline-size;
   width: 100%;
   max-width: 100%;
   align-self: center;
@@ -402,6 +423,7 @@ input[type="number"] {
 }
 
 .login-actions {
+  contain: inline-size;
   width: 100%;
   max-width: 100%;
   align-self: center;
